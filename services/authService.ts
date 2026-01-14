@@ -13,14 +13,21 @@ export const loginUser = async (email: string , password: string) => {
 }
 
 export const registerUser = async (
+
     fullName: string,
     email: string,
     password: string
+
 )=>{
-      const userCredential = await createUserWithEmailAndPassword(
+    const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
-      )
-
+    )
+    await updateProfile(userCredential.user , { displayName: fullName})
+    await setDoc(doc(db, "user" , userCredential.user.uid), {
+        fullName,
+        email,
+        createdAt: new Date()
+    })
 }
