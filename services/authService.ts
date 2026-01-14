@@ -1,3 +1,17 @@
 import { initializeApp } from "firebase/app"
 // @ts-ignore
 import { initializeAuth , getReactNativePersistence } from "firebase/auth"
+import AsyncStorage  from "@react-native-async-storage/async-storage"
+import { getFirestore } from "firebase/firestore"
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCXY2O9rNoGwGmt2j3OKJq4wVgWYUXKh94",
+  authDomain: "amd-groceary-app.firebaseapp.com",
+  projectId: "amd-groceary-app",
+  storageBucket: "amd-groceary-app.firebasestorage.app",
+  messagingSenderId: "399443299214",
+  appId: "1:399443299214:web:96f30344b1ba951ff532df",
+  measurementId: "G-LFLSTJLT0L"
+};
+
+const app = initializeApp(firebaseConfig);
