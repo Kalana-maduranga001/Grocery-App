@@ -10,8 +10,8 @@ const firebaseConfig = {
   projectId: "amd-groceary-app",
   storageBucket: "amd-groceary-app.firebasestorage.app",
   messagingSenderId: "399443299214",
-  appId: "1:399443299214:web:96f30344b1ba951ff532df",
-  measurementId: "G-LFLSTJLT0L"
+  appId: "1:399443299214:web:96f30344b1ba951ff532df"
+  //   measurementId: "G-LFLSTJLT0L"
 };
 
 const app = initializeApp(firebaseConfig);
