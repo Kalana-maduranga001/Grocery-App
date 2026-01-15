@@ -43,35 +43,35 @@ export default function Login () {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    {/* //   <View className='flex-1 justify-center items-center bg-gray-50 p-6'>
-    //     <View className='w-full bg-white/50 backdrop-blur-md rounded-2xl p-8 shadow-lg'>
-    //       <Text className='text-3xl font-bold mb-6 text-center text-gray-900'>
-    //         Login
-    //       </Text>
-    //       <TextInput
-    //         placeholder='Email'
-    //         value={email}
-    //         onChangeText={setEmail}
-    //         placeholderTextColor='#6B7280'
-    //         className='border border-gray-300 p-3 mb-4 rounded-xl bg-white/70'
-    //       />
-    //       <PasswordInput password={password} setPassword={setPassword} />
-    //       <GlassButton
-    //         title='Login'
-    //         onPress={handleLogin}
-    //         loading={isLoading}
-    //         bgColor='bg-blue-600/80'
-    //       />
-    //       <View className='flex-row justify-center mt-2'>
-    //         <Text className='text-gray-700'>Don't have an account? </Text>
-    //         <TouchableOpacity
-    //           onPress={() => router.replace('/(auth)/register')}
-    //         >
-    //           <Text className='text-blue-600 font-semibold'>Register</Text>
-    //         </TouchableOpacity>
-    //       </View>
-    //     </View>
-    //   </View> */}
+      <View className='flex-1 justify-center items-center bg-gray-50 p-6'>
+        <View className='w-full bg-white/50 backdrop-blur-md rounded-2xl p-8 shadow-lg'>
+          <Text className='text-3xl font-bold mb-6 text-center text-gray-900'>
+            Login
+          </Text>
+          <TextInput
+            placeholder='Email'
+            value={email}
+            onChangeText={setEmail}
+            placeholderTextColor='#6B7280'
+            className='border border-gray-300 p-3 mb-4 rounded-xl bg-white/70'
+          />
+          <PasswordInput password={password} setPassword={setPassword} />
+          <GlassButton
+            title='Login'
+            onPress={handleLogin}
+            loading={isLoading}
+            bgColor='bg-blue-600/80'
+          />
+          <View className='flex-row justify-center mt-2'>
+            <Text className='text-gray-700'>Don't have an account? </Text>
+            <TouchableOpacity
+              onPress={() => router.replace('./(auth)/register')}
+            >
+              <Text className='text-blue-600 font-semibold'>Register</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     </TouchableWithoutFeedback>
   )
 }
