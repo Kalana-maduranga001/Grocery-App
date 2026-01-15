@@ -43,51 +43,51 @@ export default function Register () {
     }
   }
 
-//   return (
-//     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-//       <View className='flex-1 justify-center items-center bg-gray-50 p-6'>
-//         <View className='w-full bg-white/90 rounded-2xl p-8 shadow-lg'>
-//           <Text className='text-3xl font-bold mb-6 text-center text-gray-900'>
-//             Register
-//           </Text>
-//           <TextInput
-//             placeholder='Full Name'
-//             value={fullName}
-//             onChangeText={setFullName}
-//             placeholderTextColor='#6B7280'
-//             className='border border-gray-300 p-3 mb-4 rounded-xl bg-white'
-//           />
-//           <TextInput
-//             placeholder='Email'
-//             value={email}
-//             onChangeText={setEmail}
-//             placeholderTextColor='#6B7280'
-//             className='border border-gray-300 p-3 mb-4 rounded-xl bg-white'
-//           />
-//           <PasswordInput
-//             password={password}
-//             setPassword={setPassword}
-//             placeholder='Password'
-//           />
-//           <PasswordInput
-//             password={confirmPassword}
-//             setPassword={setConfirmPassword}
-//             placeholder='Confirm Password'
-//           />
-//           <GlassButton
-//             title={isLoading ? 'Please wait...' : 'Register'}
-//             onPress={handleRegister}
-//             loading={isLoading}
-//             bgColor='bg-green-600/80'
-//           />
-//           <View className='flex-row justify-center mt-2'>
-//             <Text className='text-gray-700'>Already have an account? </Text>
-//             <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
-//               <Text className='text-blue-600 font-semibold'>Login</Text>
-//             </TouchableOpacity>
-//           </View>
-//         </View>
-//       </View>
-//     </TouchableWithoutFeedback>
-//   )
-// }
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View className='flex-1 justify-center items-center bg-gray-50 p-6'>
+        <View className='w-full bg-white/90 rounded-2xl p-8 shadow-lg'>
+          <Text className='text-3xl font-bold mb-6 text-center text-gray-900'>
+            Register
+          </Text>
+          <TextInput
+            placeholder='Full Name'
+            value={fullName}
+            onChangeText={setFullName}
+            placeholderTextColor='#6B7280'
+            className='border border-gray-300 p-3 mb-4 rounded-xl bg-white'
+          />
+          <TextInput
+            placeholder='Email'
+            value={email}
+            onChangeText={setEmail}
+            placeholderTextColor='#6B7280'
+            className='border border-gray-300 p-3 mb-4 rounded-xl bg-white'
+          />
+          <PasswordInput
+            password={password}
+            setPassword={setPassword}
+            placeholder='Password'
+          />
+          <PasswordInput
+            password={confirmPassword}
+            setPassword={setConfirmPassword}
+            placeholder='Confirm Password'
+          />
+          <GlassButton
+            title={isLoading ? 'Please wait...' : 'Register'}
+            onPress={handleRegister}
+            loading={isLoading}
+            bgColor='bg-green-600/80'
+          />
+          <View className='flex-row justify-center mt-2'>
+            <Text className='text-gray-700'>Already have an account? </Text>
+            <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
+              <Text className='text-blue-600 font-semibold'>Login</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </TouchableWithoutFeedback>
+  )
+}
