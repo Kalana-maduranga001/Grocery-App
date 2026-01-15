@@ -1,18 +1,18 @@
-// import { useState } from 'react'
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   TouchableWithoutFeedback,
-//   Keyboard
-// } from 'react-native'
-// import { useRouter } from 'expo-router'
-// import { useLoader } from '@/hooks/useLoader'
-// import { showToast } from '@/utils/notifications'
-// import { registerUser } from '@/services/authService'
-// import GlassButton from '@/components/GlassButton'
-// import PasswordInput from '@/components/PasswordInput'
+import { useState } from 'react'
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard
+} from 'react-native'
+import { useRouter } from 'expo-router'
+import { useLoader } from '@/hooks/useLoader'
+import { showToast } from '@/utils/notifications'
+import { registerUser } from '@/services/authService'
+import GlassButton from '@/components/GlassButton'
+import PasswordInput from '@/components/PasswordInput'
 
 // export default function Register () {
 //   const router = useRouter()
