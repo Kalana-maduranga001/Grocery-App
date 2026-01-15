@@ -41,9 +41,9 @@ export default function Login () {
     }
   }
 
-//   return (
-    // <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    //   <View className='flex-1 justify-center items-center bg-gray-50 p-6'>
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    {/* //   <View className='flex-1 justify-center items-center bg-gray-50 p-6'>
     //     <View className='w-full bg-white/50 backdrop-blur-md rounded-2xl p-8 shadow-lg'>
     //       <Text className='text-3xl font-bold mb-6 text-center text-gray-900'>
     //         Login
@@ -71,7 +71,7 @@ export default function Login () {
     //         </TouchableOpacity>
     //       </View>
     //     </View>
-    //   </View>
-    // </TouchableWithoutFeedback>
-//   )
+    //   </View> */}
+    </TouchableWithoutFeedback>
+  )
 }
