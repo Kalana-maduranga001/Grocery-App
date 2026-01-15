@@ -10,8 +10,8 @@ import {
 import { useRouter } from 'expo-router'
 import { useLoader } from '@/hooks/useLoader'
 import { showToast } from '@/utils/notifications'
-// import GlassButton from '@/components/GlassButton'
-// import PasswordInput from '@/components/PasswordInput'
+import GlassButton from '@/components/GlassButton'
+import PasswordInput from '@/components/PasswordInput'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function Login () {
@@ -30,15 +30,15 @@ export default function Login () {
       )
     }
 
-    // showLoader()
-    // try {
-    //   await login(email, password)
-    //   router.replace('/(dashboard)/home')
-    // } catch (err: any) {
-    //   showToast('error', 'Login Error', err.message)
-    // } finally {
-    //   hideLoader()
-    // }
+    showLoader()
+    try {
+      await login(email, password)
+      router.replace('./(dashboard)/home')
+    } catch (err: any) {
+      showToast('error', 'Login Error', err.message)
+    } finally {
+      hideLoader()
+    }
   }
 
 //   return (
