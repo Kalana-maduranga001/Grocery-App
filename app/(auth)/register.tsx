@@ -14,34 +14,34 @@ import { registerUser } from '@/services/authService'
 import GlassButton from '@/components/GlassButton'
 import PasswordInput from '@/components/PasswordInput'
 
-// export default function Register () {
-//   const router = useRouter()
-//   const { showLoader, hideLoader, isLoading } = useLoader()
+export default function Register () {
+  const router = useRouter()
+  const { showLoader, hideLoader, isLoading } = useLoader()
 
-//   const [fullName, setFullName] = useState('')
-//   const [email, setEmail] = useState('')
-//   const [password, setPassword] = useState('')
-//   const [confirmPassword, setConfirmPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
-//   const handleRegister = async () => {
-//     if (!fullName || !email || !password || !confirmPassword) {
-//       return showToast('error', 'Validation Error', 'Please fill all fields')
-//     }
-//     if (password !== confirmPassword) {
-//       return showToast('error', 'Validation Error', 'Passwords do not match')
-//     }
+  const handleRegister = async () => {
+    if (!fullName || !email || !password || !confirmPassword) {
+      return showToast('error', 'Validation Error', 'Please fill all fields')
+    }
+    if (password !== confirmPassword) {
+      return showToast('error', 'Validation Error', 'Passwords do not match')
+    }
 
-//     showLoader()
-//     try {
-//       await registerUser(fullName, email, password)
-//       showToast('success', 'Account Created', 'Welcome!')
-//       router.replace('/(auth)/login')
-//     } catch (err: any) {
-//       showToast('error', 'Register Error', err.message)
-//     } finally {
-//       hideLoader()
-//     }
-//   }
+    showLoader()
+    try {
+      await registerUser(fullName, email, password)
+      showToast('success', 'Account Created', 'Welcome!')
+      router.replace('/(auth)/login')
+    } catch (err: any) {
+      showToast('error', 'Register Error', err.message)
+    } finally {
+      hideLoader()
+    }
+  }
 
 //   return (
 //     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
