@@ -35,7 +35,7 @@ export default function Register () {
     try {
       await registerUser(fullName, email, password)
       showToast('success', 'Account Created', 'Welcome!')
-      router.replace('./(auth)/login')
+      router.replace('/(auth)/login')
     } catch (err: any) {
       showToast('error', 'Register Error', err.message)
     } finally {
@@ -82,7 +82,7 @@ export default function Register () {
           />
           <View className='flex-row justify-center mt-2'>
             <Text className='text-gray-700'>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.replace('./(auth)/login')}>
+            <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
               <Text className='text-blue-600 font-semibold'>Login</Text>
             </TouchableOpacity>
           </View>

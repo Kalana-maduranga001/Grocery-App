@@ -33,7 +33,7 @@ export default function Login () {
     showLoader()
     try {
       await login(email, password)
-      router.replace('./(dashboard)/home')
+      router.replace('/(dashboard)/home')
     } catch (err: any) {
       showToast('error', 'Login Error', err.message)
     } finally {
@@ -65,7 +65,7 @@ export default function Login () {
           <View className='flex-row justify-center mt-2'>
             <Text className='text-gray-700'>Don't have an account? </Text>
             <TouchableOpacity
-              onPress={() => router.replace('./(auth)/register')}
+              onPress={() => router.replace('/(auth)/register')}
             >
               <Text className='text-blue-600 font-semibold'>Register</Text>
             </TouchableOpacity>

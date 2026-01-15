@@ -28,6 +28,7 @@ export const showConfirmation = (
     [
       { text: "Cancel", style: "cancel" },
       { text: "OK", onPress: onConfirm }
+      
     ],
     { cancelable: true }
   )

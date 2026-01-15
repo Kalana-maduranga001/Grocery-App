@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar'
 import { Slot } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
-import '../globals.css'
+import '../global.css'
 import { AuthProvider } from '@/context/AuthContext'
 import { LoaderProvider } from '@/context/LoaderContext'
 
