@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useLoader } from "@/hooks/useLoader";
@@ -23,6 +23,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleRegister = async () => {
     console.log("Register button clicked");
@@ -30,13 +31,25 @@ export default function Register() {
     // Validation
     if (!fullName || !email || !password || !confirmPassword) {
       console.log("Validation failed: Empty fields");
-      Alert.alert("Validation Error", "Please fill all fields");
+      Toast.show({
+        type: "error",
+        text1: "Validation Error",
+        text2: "Please fill all fields",
+        position: "top",
+        visibilityTime: 3000,
+      });
       return;
     }
 
     if (password !== confirmPassword) {
       console.log("Validation failed: Passwords don't match");
-      Alert.alert("Validation Error", "Passwords do not match");
+      Toast.show({
+        type: "error",
+        text1: "Validation Error",
+        text2: "Passwords do not match",
+        position: "top",
+        visibilityTime: 3000,
+      });
       return;
     }
 
@@ -46,42 +59,32 @@ export default function Register() {
     try {
       console.log("Calling registerUser...");
       await registerUser(fullName, email, password);
-      console.log("Registration SUCCESS - Now showing message");
+      console.log("Registration SUCCESS - Now showing success screen");
       
       hideLoader();
+      
+      // Show success screen
+      setShowSuccess(true);
 
-      // Show native alert first (this WILL work)
-      Alert.alert(
-        "Registration Successful! 🎉",
-        "Your account has been created. Please login now.",
-        [
-          {
-            text: "Go to Login",
-            onPress: () => {
-              console.log("Navigating to login page...");
-              router.replace("/(auth)/login");
-            }
-          }
-        ]
-      );
-
-      // Also show toast
+      // Show toast
       Toast.show({
         type: "success",
         text1: "Registration Successful! 🎉",
-        text2: "Please login with your new account",
+        text2: "Redirecting to login...",
         position: "top",
-        visibilityTime: 3000,
+        visibilityTime: 2500,
       });
+
+      // Redirect after 2.5 seconds
+      console.log("Setting timeout for redirect...");
+      setTimeout(() => {
+        console.log("NOW REDIRECTING TO LOGIN PAGE");
+        router.replace("/(auth)/login");
+      }, 2500);
 
     } catch (err: any) {
       console.error("Registration error:", err);
       hideLoader();
-      
-      Alert.alert(
-        "Registration Failed",
-        err.message || "Something went wrong. Please try again."
-      );
       
       Toast.show({
         type: "error",
@@ -93,6 +96,31 @@ export default function Register() {
     }
   };
 
+  // Success Screen
+  if (showSuccess) {
+    return (
+      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+        <View className="w-full bg-white/90 rounded-2xl p-8 shadow-lg items-center">
+          <View className="w-20 h-20 bg-green-100 rounded-full items-center justify-center mb-6">
+            <Text className="text-5xl">✓</Text>
+          </View>
+          
+          <Text className="text-3xl font-bold mb-4 text-center text-gray-900">
+            Registration Successful!
+          </Text>
+          
+          <Text className="text-lg text-gray-600 text-center mb-8">
+            Your account has been created successfully.{"\n"}
+            Redirecting to login page...
+          </Text>
+          
+          <ActivityIndicator size="large" color="#10b981" />
+        </View>
+      </View>
+    );
+  }
+
+  // Registration Form
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
