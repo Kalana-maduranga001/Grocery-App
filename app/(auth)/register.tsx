@@ -25,61 +25,63 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleRegister = async () => {
-    console.log("Register button clicked"); // Debug log
+    console.log("Register button clicked");
 
     // Validation
     if (!fullName || !email || !password || !confirmPassword) {
       console.log("Validation failed: Empty fields");
-      Toast.show({
-        type: "error",
-        text1: "Validation Error",
-        text2: "Please fill all fields",
-        position: "top",
-        visibilityTime: 3000,
-      });
+      Alert.alert("Validation Error", "Please fill all fields");
       return;
     }
 
     if (password !== confirmPassword) {
       console.log("Validation failed: Passwords don't match");
-      Toast.show({
-        type: "error",
-        text1: "Validation Error",
-        text2: "Passwords do not match",
-        position: "top",
-        visibilityTime: 3000,
-      });
+      Alert.alert("Validation Error", "Passwords do not match");
       return;
     }
 
-    console.log("Starting registration..."); // Debug log
+    console.log("Starting registration...");
     showLoader();
     
     try {
-      console.log("Calling registerUser..."); // Debug log
-      const result = await registerUser(fullName, email, password);
-      console.log("Registration result:", result); // Debug log
+      console.log("Calling registerUser...");
+      await registerUser(fullName, email, password);
+      console.log("Registration SUCCESS - Now showing message");
       
       hideLoader();
 
-      // Show success toast
+      // Show native alert first (this WILL work)
+      Alert.alert(
+        "Registration Successful! 🎉",
+        "Your account has been created. Please login now.",
+        [
+          {
+            text: "Go to Login",
+            onPress: () => {
+              console.log("Navigating to login page...");
+              router.replace("/(auth)/login");
+            }
+          }
+        ]
+      );
+
+      // Also show toast
       Toast.show({
         type: "success",
         text1: "Registration Successful! 🎉",
-        text2: "Redirecting to login...",
+        text2: "Please login with your new account",
         position: "top",
-        visibilityTime: 2000,
+        visibilityTime: 3000,
       });
 
-      // Wait for toast to show, then navigate
-      setTimeout(() => {
-        console.log("Navigating to login..."); // Debug log
-        router.replace("/(auth)/login");
-      }, 2000);
-
     } catch (err: any) {
-      console.error("Registration error:", err); // Debug log
+      console.error("Registration error:", err);
       hideLoader();
+      
+      Alert.alert(
+        "Registration Failed",
+        err.message || "Something went wrong. Please try again."
+      );
       
       Toast.show({
         type: "error",

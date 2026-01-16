@@ -24,56 +24,65 @@ export const registerUser = async (
   email: string,
   password: string
 ) => {
+  console.log("=== STARTING REGISTRATION ===");
+  console.log("registerUser called with:", { fullName, email });
+
+  // Validation
+  if (password.length < 6) {
+    throw new Error("Password must be at least 6 characters");
+  }
+  if (!email.includes("@")) {
+    throw new Error("Invalid email address");
+  }
+  if (!fullName.trim()) {
+    throw new Error("Full name is required");
+  }
+
   try {
-    console.log("registerUser called with:", { fullName, email });
-
-    // Validation
-    if (password.length < 6) {
-      throw new Error("Password must be at least 6 characters");
-    }
-    if (!email.includes("@")) {
-      throw new Error("Invalid email address");
-    }
-    if (!fullName.trim()) {
-      throw new Error("Full name is required");
-    }
-
-    console.log("Creating user in Firebase Auth...");
+    console.log("Step 1: Creating user in Firebase Auth...");
     
     // Create user in Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
-    console.log("User created:", user.uid);
+    console.log("Step 2: User created with UID:", user.uid);
 
     // Update display name
-    console.log("Updating profile...");
+    console.log("Step 3: Updating profile...");
     await updateProfile(user, { displayName: fullName });
+    console.log("Step 4: Profile updated successfully");
 
-    // Save user to Firestore
-    console.log("Saving to Firestore...");
+    // Try to save to Firestore with timeout
+    console.log("Step 5: Attempting to save to Firestore...");
     try {
-      await setDoc(doc(db, "users", user.uid), {
+      const savePromise = setDoc(doc(db, "users", user.uid), {
         fullName: fullName.trim(),
         email: email.toLowerCase(),
         createdAt: serverTimestamp(),
       });
-      console.log("Firestore save successful");
-    } catch (firestoreError) {
-      console.warn("Firestore save failed, but continuing:", firestoreError);
+
+      // Add a timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Firestore timeout")), 5000);
+      });
+
+      await Promise.race([savePromise, timeoutPromise]);
+      console.log("Step 6: Firestore save successful");
+    } catch (firestoreError: any) {
+      console.warn("Step 6: Firestore save failed (continuing anyway):", firestoreError.message);
       // Continue even if Firestore fails - user is created in Auth
     }
 
-    console.log("Signing out user...");
-    // Sign out after registration so they can login
+    console.log("Step 7: Signing out user...");
     await signOut(auth);
-    console.log("Sign out successful");
+    console.log("Step 8: Sign out successful");
 
-    console.log("Registration completed successfully");
+    console.log("=== REGISTRATION COMPLETED SUCCESSFULLY ===");
     return true;
 
   } catch (error: any) {
-    console.error("Registration error:", error);
+    console.error("=== REGISTRATION FAILED ===");
+    console.error("Error details:", error);
     
     // Handle Firebase-specific errors
     if (error.code === "auth/email-already-in-use") {
