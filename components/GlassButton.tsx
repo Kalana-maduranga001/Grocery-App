@@ -6,6 +6,7 @@ interface GlassButtonProps {
   className?: string
   loading?: boolean
   bgColor?: string
+  disabled?: boolean // Added this
 }
 
 export default function GlassButton ({
@@ -13,15 +14,18 @@ export default function GlassButton ({
   onPress,
   loading = false,
   className = '',
-  bgColor = 'bg-black/30'
+  bgColor = 'bg-black/30',
+  disabled = false // Added with default value
 }: GlassButtonProps) {
+  const isDisabled = loading || disabled
+
   return (
     <Pressable
       onPress={onPress}
-      disabled={loading}
+      disabled={isDisabled} // Use combined disabled state
       style={({ pressed }) => ({
         transform: [{ scale: pressed ? 0.97 : 1 }],
-        opacity: pressed ? 0.9 : 1
+        opacity: isDisabled ? 0.6 : pressed ? 0.9 : 1 // Show disabled state
       })}
       className={className}
     >

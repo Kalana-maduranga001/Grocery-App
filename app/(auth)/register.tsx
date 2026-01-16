@@ -96,10 +96,10 @@ export default function Register() {
     }
   };
 
-  // Success Screen
+  // Success Screen - Blocks all interaction
   if (showSuccess) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+      <View className="flex-1 justify-center items-center bg-gray-50 p-6" pointerEvents="none">
         <View className="w-full bg-white/90 rounded-2xl p-8 shadow-lg items-center">
           <View className="w-20 h-20 bg-green-100 rounded-full items-center justify-center mb-6">
             <Text className="text-5xl">✓</Text>
@@ -115,6 +115,10 @@ export default function Register() {
           </Text>
           
           <ActivityIndicator size="large" color="#10b981" />
+          
+          <Text className="text-sm text-gray-500 mt-4">
+            Please wait...
+          </Text>
         </View>
       </View>
     );
@@ -135,6 +139,7 @@ export default function Register() {
             onChangeText={setFullName}
             placeholderTextColor="#6B7280"
             autoCapitalize="words"
+            editable={!isLoading}
             className="border border-gray-300 p-3 mb-4 rounded-xl bg-white"
           />
 
@@ -146,19 +151,22 @@ export default function Register() {
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            editable={!isLoading}
             className="border border-gray-300 p-3 mb-4 rounded-xl bg-white"
           />
 
           <PasswordInput 
             password={password} 
             setPassword={setPassword} 
-            placeholder="Password" 
+            placeholder="Password"
+            editable={!isLoading}
           />
           
           <PasswordInput
             password={confirmPassword}
             setPassword={setConfirmPassword}
             placeholder="Confirm Password"
+            editable={!isLoading}
           />
 
           <GlassButton
@@ -166,11 +174,16 @@ export default function Register() {
             onPress={handleRegister}
             loading={isLoading}
             bgColor="bg-green-600/80"
+            disabled={isLoading}
           />
 
           <View className="flex-row justify-center mt-4">
             <Text className="text-gray-700 text-base">Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.replace("/(auth)/login")}>
+            <TouchableOpacity 
+              onPress={() => router.replace("/(auth)/login")}
+              disabled={isLoading}
+              style={{ opacity: isLoading ? 0.5 : 1 }}
+            >
               <Text className="text-blue-600 font-semibold text-base">Login</Text>
             </TouchableOpacity>
           </View>
