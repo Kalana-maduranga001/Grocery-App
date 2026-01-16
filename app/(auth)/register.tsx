@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -18,12 +18,22 @@ import PasswordInput from "@/components/PasswordInput";
 export default function Register() {
   const router = useRouter();
   const { showLoader, hideLoader, isLoading } = useLoader();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleRegister = async () => {
     console.log("Register button clicked");
@@ -61,7 +71,8 @@ export default function Register() {
       await registerUser(fullName, email, password);
       console.log("Registration SUCCESS - Now showing success screen");
       
-      hideLoader();
+      // DON'T hide loader yet - keep it showing
+      // hideLoader(); // REMOVED THIS
       
       // Show success screen
       setShowSuccess(true);
@@ -75,10 +86,11 @@ export default function Register() {
         visibilityTime: 2500,
       });
 
-      // Redirect after 2.5 seconds
+      // Redirect after 2.5 seconds with cleanup reference
       console.log("Setting timeout for redirect...");
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         console.log("NOW REDIRECTING TO LOGIN PAGE");
+        hideLoader(); // Hide loader just before redirect
         router.replace("/(auth)/login");
       }, 2500);
 
@@ -139,7 +151,7 @@ export default function Register() {
             onChangeText={setFullName}
             placeholderTextColor="#6B7280"
             autoCapitalize="words"
-            editable={!isLoading}
+            editable={!isLoading && !showSuccess}
             className="border border-gray-300 p-3 mb-4 rounded-xl bg-white"
           />
 
@@ -151,7 +163,7 @@ export default function Register() {
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
-            editable={!isLoading}
+            editable={!isLoading && !showSuccess}
             className="border border-gray-300 p-3 mb-4 rounded-xl bg-white"
           />
 
@@ -159,14 +171,14 @@ export default function Register() {
             password={password} 
             setPassword={setPassword} 
             placeholder="Password"
-            editable={!isLoading}
+            editable={!isLoading && !showSuccess}
           />
           
           <PasswordInput
             password={confirmPassword}
             setPassword={setConfirmPassword}
             placeholder="Confirm Password"
-            editable={!isLoading}
+            editable={!isLoading && !showSuccess}
           />
 
           <GlassButton
@@ -174,15 +186,15 @@ export default function Register() {
             onPress={handleRegister}
             loading={isLoading}
             bgColor="bg-green-600/80"
-            disabled={isLoading}
+            disabled={isLoading || showSuccess}
           />
 
           <View className="flex-row justify-center mt-4">
             <Text className="text-gray-700 text-base">Already have an account? </Text>
             <TouchableOpacity 
               onPress={() => router.replace("/(auth)/login")}
-              disabled={isLoading}
-              style={{ opacity: isLoading ? 0.5 : 1 }}
+              disabled={isLoading || showSuccess}
+              style={{ opacity: (isLoading || showSuccess) ? 0.5 : 1 }}
             >
               <Text className="text-blue-600 font-semibold text-base">Login</Text>
             </TouchableOpacity>
