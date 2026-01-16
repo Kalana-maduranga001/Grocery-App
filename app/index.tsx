@@ -14,8 +14,8 @@ export default function Index () {
   }
 
   if (user) {
-    return <Redirect href='./(dashboard)/home' />
+    return <Redirect href='/(dashboard)/home' />
   } else {
-    return <Redirect href='./(auth)/login' />
+    return <Redirect href='/(auth)/login' />
   }
 }

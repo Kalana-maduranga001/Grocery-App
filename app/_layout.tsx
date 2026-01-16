@@ -11,13 +11,16 @@ export default function RootLayout () {
   return (
     <LoaderProvider>
       <AuthProvider>
-        <SafeAreaView className='flex-1 bg-gray-50'>
-          <StatusBar style='dark' />
-          <Slot />
-        </SafeAreaView>
-        <Toast />
+        <>
+          <SafeAreaView className="flex-1 bg-gray-50">
+            <StatusBar style="dark" />
+            <Slot />
+          </SafeAreaView>
+
+          {/* ✅ Toast MUST be outside SafeAreaView */}
+          <Toast />
+        </>
       </AuthProvider>
     </LoaderProvider>
   )
 }
-  
