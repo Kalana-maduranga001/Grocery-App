@@ -35,16 +35,16 @@ export default function Lists() {
     return () => unsubscribe()
   }, [user])
 
-//   const markItemCompleted = async (listId: string) => {
-//     try {
-//     //   const listRef = doc(db, "users", user.uid, "lists", listId)
-//     //   await updateDoc(listRef, { completedCount: increment(1) })
-//       showToast("success", "Updated", "Item marked completed")
-//     } catch (error) {
-//       console.error(error)
-//       showToast("error", "Failed", "Could not update list")
-//     }
-//   }
+  const markItemCompleted = async (listId: string) => {
+    // try {
+    // //   const listRef = doc(db, "users", user.uid, "lists", listId)
+    // //   await updateDoc(listRef, { completedCount: increment(1) })
+    //   showToast("success", "Updated", "Item marked completed")
+    // } catch (error) {
+    //   console.error(error)
+    //   showToast("error", "Failed", "Could not update list")
+    // }
+  }
 
   const deleteList = async (listId: string) => {
     Alert.alert("Delete List", "Are you sure you want to delete this list?", [
