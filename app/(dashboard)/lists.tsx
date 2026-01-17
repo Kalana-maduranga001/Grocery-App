@@ -37,8 +37,8 @@ export default function Lists() {
 
   const markItemCompleted = async (listId: string) => {
     try {
-    //   const listRef = doc(db, "users", user.uid, "lists", listId)
-    //   await updateDoc(listRef, { completedCount: increment(1) })
+      const listRef = doc(db, "users", user.uid, "lists", listId)
+      await updateDoc(listRef, { completedCount: increment(1) })
       showToast("success", "Updated", "Item marked completed")
     } catch (error) {
       console.error(error)
