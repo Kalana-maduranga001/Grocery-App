@@ -37,8 +37,8 @@ export default function Lists() {
 
   const markItemCompleted = async (listId: string) => {
     try {
-      const listRef = doc(db, "users", user.uid, "lists", listId)
-      await updateDoc(listRef, { completedCount: increment(1) })
+    //   const listRef = doc(db, "users", user.uid, "lists", listId)
+    //   await updateDoc(listRef, { completedCount: increment(1) })
       showToast("success", "Updated", "Item marked completed")
     } catch (error) {
       console.error(error)
@@ -67,18 +67,18 @@ export default function Lists() {
 
   return (
     <View className="flex-1 bg-gray-50">
-    //   {/* Header */}
-    //   <View className="bg-green-600 pt-12 pb-6 px-6 rounded-b-3xl shadow-lg">
-    //     <View className="flex-row items-center">
-    //       <TouchableOpacity onPress={() => router.back()} className="mr-3">
-    //         <Ionicons name="arrow-back" size={24} color="white" />
-    //       </TouchableOpacity>
-    //       <Text className="text-white text-2xl font-bold">📋 My Grocery Lists</Text>
-    //     </View>
-    //   </View>
+      {/* Header */}
+      <View className="bg-green-600 pt-12 pb-6 px-6 rounded-b-3xl shadow-lg">
+        <View className="flex-row items-center">
+          <TouchableOpacity onPress={() => router.back()} className="mr-3">
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <Text className="text-white text-2xl font-bold">📋 My Grocery Lists</Text>
+        </View>
+      </View>
 
-      {/* <ScrollView className="flex-1 px-6 mt-4" showsVerticalScrollIndicator={false}> */}
-        {/* {lists.length === 0 ? (
+      <ScrollView className="flex-1 px-6 mt-4" showsVerticalScrollIndicator={false}>
+        {lists.length === 0 ? (
           <View className="items-center mt-20">
             <Ionicons name="list-outline" size={64} color="#9CA3AF" />
             <Text className="text-gray-500 mt-4 text-lg">No grocery lists yet</Text>
@@ -106,7 +106,7 @@ export default function Lists() {
                   <View className="flex-row space-x-2">
                     <TouchableOpacity
                       className="bg-green-100 rounded-full px-3 py-1"
-                    //   onPress={() => markItemCompleted(list.id)}
+                      onPress={() => markItemCompleted(list.id)}
                     >
                       <Text className="text-green-700 font-semibold text-xs">{progress}% ✅</Text>
                     </TouchableOpacity>
@@ -126,15 +126,15 @@ export default function Lists() {
             )
           })
         )}
-      </ScrollView> */}
+      </ScrollView>
 
       {/* Floating Action Button */}
-      {/* <TouchableOpacity
+      <TouchableOpacity
         className="absolute bottom-6 right-6 bg-green-600 rounded-full w-16 h-16 items-center justify-center shadow-lg"
         onPress={() => router.push("/(dashboard)/create-list")}
       >
         <Ionicons name="add" size={32} color="white" />
-      </TouchableOpacity> */}
+      </TouchableOpacity>
     </View>
   )
 }
