@@ -15,24 +15,24 @@ export default function Lists() {
   useEffect(() => {
     if (!user) return
 
-    // const listsRef = collection(db, "users", user.uid, "lists")
+    const listsRef = collection(db, "users", user.uid, "lists")
 
-    // const unsubscribe = onSnapshot(
-    //   listsRef,
-    //   snapshot => {
-    //     const userLists: any[] = []
-    //     snapshot.forEach(doc => {
-    //       userLists.push({ id: doc.id, ...doc.data() })
-    //     })
-    //     setLists(userLists)
-    //   },
-    //   error => {
-    //     console.error("Failed to fetch lists in real-time:", error)
-    //     showToast("error", "Error", "Could not fetch lists")
-    //   }
-    // )
+    const unsubscribe = onSnapshot(
+      listsRef,
+      snapshot => {
+        const userLists: any[] = []
+        snapshot.forEach(doc => {
+          userLists.push({ id: doc.id, ...doc.data() })
+        })
+        setLists(userLists)
+      },
+      error => {
+        console.error("Failed to fetch lists in real-time:", error)
+        showToast("error", "Error", "Could not fetch lists")
+      }
+    )
 
-    // return () => unsubscribe()
+    return () => unsubscribe()
   }, [user])
 
 //   const markItemCompleted = async (listId: string) => {
