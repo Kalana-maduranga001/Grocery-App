@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ export default function Home() {
   const { user, logout } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
-  // Mock data - replace with real data from Firebase later
+  // Mock data - replace with Firebase later
   const [groceryLists, setGroceryLists] = useState([
     { id: "1", name: "Weekly Shopping", itemCount: 12, completedCount: 8 },
     { id: "2", name: "Party Supplies", itemCount: 5, completedCount: 0 },
@@ -30,7 +30,7 @@ export default function Home() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // TODO: Fetch data from Firebase
+    // TODO: Fetch updated data from Firebase
     setTimeout(() => {
       setRefreshing(false);
       showToast("success", "Refreshed", "Data updated successfully");
@@ -80,6 +80,7 @@ export default function Home() {
         </View>
       </View>
 
+      {/* Content */}
       <ScrollView
         className="flex-1 px-6 mt-4"
         showsVerticalScrollIndicator={false}
@@ -91,9 +92,7 @@ export default function Home() {
         {lowStockItems.length > 0 && (
           <View className="mb-6">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-xl font-bold text-gray-900">
-                ⚠️ Low Stock Items
-              </Text>
+              <Text className="text-xl font-bold text-gray-900">⚠️ Low Stock Items</Text>
               <TouchableOpacity onPress={() => router.push("/(dashboard)/stock")}>
                 <Text className="text-green-600 font-semibold">View All</Text>
               </TouchableOpacity>
@@ -106,17 +105,11 @@ export default function Home() {
                 onPress={() => showToast("info", "Stock Alert", `${item.name} is running low`)}
               >
                 <View className="flex-1">
-                  <Text className="text-gray-900 font-semibold text-base">
-                    {item.name}
-                  </Text>
-                  <Text className="text-gray-600 text-sm mt-1">
-                    Remaining: {item.quantity}
-                  </Text>
+                  <Text className="text-gray-900 font-semibold text-base">{item.name}</Text>
+                  <Text className="text-gray-600 text-sm mt-1">Remaining: {item.quantity}</Text>
                 </View>
                 <View className="bg-orange-500 rounded-full px-3 py-1">
-                  <Text className="text-white font-bold text-xs">
-                    {item.daysLeft}d left
-                  </Text>
+                  <Text className="text-white font-bold text-xs">{item.daysLeft}d left</Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -126,9 +119,7 @@ export default function Home() {
         {/* My Grocery Lists */}
         <View className="mb-6">
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-xl font-bold text-gray-900">
-              📋 My Grocery Lists
-            </Text>
+            <Text className="text-xl font-bold text-gray-900">📋 My Grocery Lists</Text>
             <TouchableOpacity onPress={() => router.push("/(dashboard)/lists")}>
               <Text className="text-green-600 font-semibold">View All</Text>
             </TouchableOpacity>
@@ -138,12 +129,15 @@ export default function Home() {
             <TouchableOpacity
               key={list.id}
               className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100"
-              onPress={() => router.push(`/(dashboard)/list-details?id=${list.id}`)}
+              onPress={() =>
+                router.push({
+                  pathname: "/(dashboard)/list-details/[id]",
+                  params: { id: list.id },
+                })
+              }
             >
               <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-gray-900 font-semibold text-base flex-1">
-                  {list.name}
-                </Text>
+                <Text className="text-gray-900 font-semibold text-base flex-1">{list.name}</Text>
                 <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
               </View>
 
@@ -173,9 +167,7 @@ export default function Home() {
 
         {/* Quick Actions */}
         <View className="mb-8">
-          <Text className="text-xl font-bold text-gray-900 mb-3">
-            ⚡ Quick Actions
-          </Text>
+          <Text className="text-xl font-bold text-gray-900 mb-3">⚡ Quick Actions</Text>
 
           <View className="flex-row justify-between">
             <TouchableOpacity

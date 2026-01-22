@@ -28,7 +28,7 @@ export const registerUser = async (
   console.log("registerUser called with:", { fullName, email });
 
   // Validation
-  if (password.length < 6) {
+  if (password.length < 6) {8
     throw new Error("Password must be at least 6 characters");
   }
   if (!email.includes("@")) {

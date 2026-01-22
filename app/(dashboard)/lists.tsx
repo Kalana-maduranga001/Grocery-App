@@ -1,52 +1,60 @@
-import { useState, useEffect } from "react"
-import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native"
-import { useRouter } from "expo-router"
-import { Ionicons } from "@expo/vector-icons"
-import { db } from "@/services/firebaseConfig"
-import { collection, doc, onSnapshot, updateDoc, deleteDoc, increment } from "firebase/firestore"
-import { useAuth } from "@/hooks/useAuth"
-import { showToast } from "@/utils/notifications"
+import { useState, useEffect } from "react";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { db } from "@/services/firebaseConfig";
+import { collection, doc, onSnapshot, updateDoc, deleteDoc, increment } from "firebase/firestore";
+import { useAuth } from "@/hooks/useAuth";
+import { showToast } from "@/utils/notifications";
 
 export default function Lists() {
-  const router = useRouter()
-  const { user } = useAuth()
-  const [lists, setLists] = useState<any[]>([])
+  const router = useRouter();
+  const { user } = useAuth();
+  const [lists, setLists] = useState<any[]>([]);
 
+  // Early return if user not loaded yet
+  if (!user) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-gray-500 text-lg">Loading user...</Text>
+      </View>
+    );
+  }
+
+  // Real-time Firestore listener for user lists
   useEffect(() => {
-    if (!user) return
-
-    const listsRef = collection(db, "users", user.uid, "lists")
-
+    const listsRef = collection(db, "users", user.uid, "lists");
     const unsubscribe = onSnapshot(
       listsRef,
       snapshot => {
-        const userLists: any[] = []
-        snapshot.forEach(doc => {
-          userLists.push({ id: doc.id, ...doc.data() })
-        })
-        setLists(userLists)
+        const userLists: any[] = [];
+        snapshot.forEach(doc => userLists.push({ id: doc.id, ...doc.data() }));
+        setLists(userLists);
       },
       error => {
-        console.error("Failed to fetch lists in real-time:", error)
-        showToast("error", "Error", "Could not fetch lists")
+        console.error("Failed to fetch lists:", error);
+        showToast("error", "Error", "Could not fetch lists");
       }
-    )
+    );
+    return () => unsubscribe();
+  }, [user]);
 
-    return () => unsubscribe()
-  }, [user])
-
+  // Increment completed count
   const markItemCompleted = async (listId: string) => {
+    if (!user) return;
     try {
-    //   const listRef = doc(db, "users", user.uid, "lists", listId)
-    //   await updateDoc(listRef, { completedCount: increment(1) })
-      showToast("success", "Updated", "Item marked completed")
+      const listRef = doc(db, "users", user.uid, "lists", listId);
+      await updateDoc(listRef, { completedCount: increment(1) });
+      showToast("success", "Updated", "Item marked completed");
     } catch (error) {
-      console.error(error)
-      showToast("error", "Failed", "Could not update list")
+      console.error(error);
+      showToast("error", "Failed", "Could not update list");
     }
-  }
+  };
 
-  const deleteList = async (listId: string) => {
+  // Delete a list
+  const deleteList = (listId: string) => {
+    if (!user) return;
     Alert.alert("Delete List", "Are you sure you want to delete this list?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -54,16 +62,16 @@ export default function Lists() {
         style: "destructive",
         onPress: async () => {
           try {
-            // await deleteDoc(doc(db, "users", user.uid, "lists", listId))
-            showToast("success", "Deleted", "List deleted successfully")
+            await deleteDoc(doc(db, "users", user.uid, "lists", listId));
+            showToast("success", "Deleted", "List deleted successfully");
           } catch (error) {
-            console.error(error)
-            showToast("error", "Failed", "Could not delete list")
+            console.error(error);
+            showToast("error", "Failed", "Could not delete list");
           }
         },
       },
-    ])
-  }
+    ]);
+  };
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -86,13 +94,17 @@ export default function Lists() {
         ) : (
           lists.map(list => {
             const progress =
-              list.itemCount === 0 ? 0 : Math.round((list.completedCount / list.itemCount) * 100)
-
+              list.itemCount === 0 ? 0 : Math.round((list.completedCount / list.itemCount) * 100);
             return (
               <TouchableOpacity
                 key={list.id}
                 className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100"
-                onPress={() => router.push(`/(dashboard)/list-details?id=${list.id}`)}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(dashboard)/list-details/[id]",
+                    params: { id: list.id },
+                  })
+                }
               >
                 <View className="flex-row justify-between items-center mb-2">
                   <Text className="text-gray-900 font-semibold text-lg flex-1">{list.name}</Text>
@@ -123,18 +135,10 @@ export default function Lists() {
                   <View className="bg-green-500 h-full" style={{ width: `${progress}%` }} />
                 </View>
               </TouchableOpacity>
-            )
+            );
           })
         )}
       </ScrollView>
-
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        className="absolute bottom-6 right-6 bg-green-600 rounded-full w-16 h-16 items-center justify-center shadow-lg"
-        onPress={() => router.push("/(dashboard)/create-list")}
-      >
-        <Ionicons name="add" size={32} color="white" />
-      </TouchableOpacity>
     </View>
-  )
+  );
 }
