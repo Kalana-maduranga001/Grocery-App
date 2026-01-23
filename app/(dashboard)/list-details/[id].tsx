@@ -33,17 +33,17 @@ export default function ListDetails() {
     );
   }
 
-  // // Real-time listener for list and items
-  // useEffect(() => {
-  //   const listRef = doc(db, "users", user.uid, "lists", listId);
-  //   const itemsRef = collection(
-  //     db,
-  //     "users",
-  //     user.uid,
-  //     "lists",
-  //     listId,
-  //     "items",
-  //   );
+  // Real-time listener for list and items
+  useEffect(() => {
+    const listRef = doc(db, "users", user.uid, "lists", listId);
+    const itemsRef = collection(
+      db,
+      "users",
+      user.uid,
+      "lists",
+      listId,
+      "items",
+    );
 
   //   const unsubscribeList = onSnapshot(listRef, (snapshot) => {
   //     if (snapshot.exists()) {
