@@ -100,17 +100,17 @@ export default function AddStock() {
     return unsubscribe;
   }, [user, selectedListId]);
 
-//   const selectItemFromList = (item: any) => {
-//     setName(item.name || "");
-//     setQuantity(item.quantity?.toString() || "1");
-//     setUnit(item.unit || "units");
-//     const days = item.expectedDurationDays || 30;
-//     setDurationDays(days.toString());
-//     const futureDate = new Date();
-//     futureDate.setDate(futureDate.getDate() + days);
-//     setSelectedDate(futureDate);
-//     showToast("success", "Item loaded", `${item.name} details filled`);
-//   };
+  const selectItemFromList = (item: any) => {
+    setName(item.name || "");
+    setQuantity(item.quantity?.toString() || "1");
+    setUnit(item.unit || "units");
+    const days = item.expectedDurationDays || 30;
+    setDurationDays(days.toString());
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + days);
+    setSelectedDate(futureDate);
+    showToast("success", "Item loaded", `${item.name} details filled`);
+  };
 
 //   const clearForm = () => {
 //     setName("");
