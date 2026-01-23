@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { db } from "@/services/firebaseConfig";
 import {
   cancelReminder,
+  createStockNotification,
   scheduleStockReminder,
   showToast,
 } from "@/utils/notifications";
@@ -35,12 +36,45 @@ export default function Stock() {
   const { user } = useAuth();
   const [items, setItems] = useState<StockItem[]>([]);
 
+  const daysRemaining = (it: StockItem) => {
+    if (!it.depletionDate) return null;
+    const dep = it.depletionDate.toDate().getTime();
+    const now = Date.now();
+    return Math.ceil((dep - now) / (24 * 60 * 60 * 1000));
+  };
+
   useEffect(() => {
     if (!user) return;
     const ref = collection(db, "users", user.uid, "stock");
     const unsub = onSnapshot(ref, (snap) => {
       const arr: StockItem[] = [];
-      snap.forEach((d) => arr.push({ id: d.id, ...(d.data() as any) }));
+      snap.forEach((d) => {
+        const item = { id: d.id, ...(d.data() as any) } as StockItem;
+        arr.push(item);
+
+        const daysLeft = daysRemaining(item);
+
+        // Create notification when stock has EXPIRED (daysRemaining <= 0)
+        if (daysLeft !== null && daysLeft <= 0) {
+          createStockNotification(
+            user.uid,
+            item.id,
+            item.name,
+            daysLeft,
+            true, // isExpired flag
+          );
+        }
+        // Create notification when stock is RUNNING OUT (less than 1 day remaining)
+        else if (daysLeft !== null && daysLeft < 1 && daysLeft > 0) {
+          createStockNotification(
+            user.uid,
+            item.id,
+            item.name,
+            daysLeft,
+            false,
+          );
+        }
+      });
       setItems(arr);
     });
     return () => unsub();
@@ -100,13 +134,6 @@ export default function Stock() {
         },
       ],
     );
-  };
-
-  const daysRemaining = (it: StockItem) => {
-    if (!it.depletionDate) return null;
-    const dep = it.depletionDate.toDate().getTime();
-    const now = Date.now();
-    return Math.ceil((dep - now) / (24 * 60 * 60 * 1000));
   };
 
   return (

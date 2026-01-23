@@ -1,7 +1,16 @@
 import { Alert, Platform } from "react-native";
 import Toast from "react-native-toast-message";
 // Expo local notifications for stock reminders
+import { db } from "@/services/firebaseConfig";
 import * as Notifications from "expo-notifications";
+import {
+    addDoc,
+    collection,
+    getDocs,
+    query,
+    serverTimestamp,
+    where,
+} from "firebase/firestore";
 
 // Configure notification handling behavior
 Notifications.setNotificationHandler({
@@ -109,5 +118,46 @@ export async function cancelReminder(notificationId: string) {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
   } catch (e) {
     // no-op
+  }
+}
+// Create a persistent notification in Firestore when stock is running low or expired
+export async function createStockNotification(
+  userId: string,
+  stockItemId: string,
+  itemName: string,
+  daysRemaining: number,
+  isExpired: boolean = false,
+) {
+  try {
+    // Check if unseen notification already exists for this stock item
+    const notificationsRef = collection(db, "users", userId, "notifications");
+    const q = query(
+      notificationsRef,
+      where("stockItemId", "==", stockItemId),
+      where("seen", "==", false),
+    );
+    const existingSnap = await getDocs(q);
+
+    // If unseen notification already exists, don't create duplicate
+    if (existingSnap.size > 0) {
+      return;
+    }
+
+    // Create new unseen notification with appropriate message
+    const message = isExpired
+      ? `⚠️ ${itemName} has EXPIRED and needs to be removed from stock!`
+      : `${itemName} is running low and will be depleted soon.`;
+
+    await addDoc(notificationsRef, {
+      stockItemId,
+      itemName,
+      message,
+      daysRemaining: Math.max(0, daysRemaining),
+      isExpired: isExpired,
+      seen: false,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Failed to create stock notification:", error);
   }
 }
