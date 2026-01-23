@@ -61,20 +61,20 @@ export default function AddStock() {
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [listItems, setListItems] = useState<any[]>([]);
 
-//   // Fetch lists from Firestore
-//   useEffect(() => {
-//     if (!user) return;
-//     const listsRef = collection(db, "users", user.uid, "lists");
-//     const unsubscribe = onSnapshot(listsRef, (snapshot) => {
-//       setLists(
-//         snapshot.docs.map((doc: any) => ({
-//           id: doc.id,
-//           name: doc.data().name || "Unnamed List",
-//         })),
-//       );
-//     });
-//     return unsubscribe;
-//   }, [user]);
+  // Fetch lists from Firestore
+  useEffect(() => {
+    if (!user) return;
+    const listsRef = collection(db, "users", user.uid, "lists");
+    const unsubscribe = onSnapshot(listsRef, (snapshot) => {
+      setLists(
+        snapshot.docs.map((doc: any) => ({
+          id: doc.id,
+          name: doc.data().name || "Unnamed List",
+        })),
+      );
+    });
+    return unsubscribe;
+  }, [user]);
 
 //   // Fetch items from selected list
 //   useEffect(() => {
