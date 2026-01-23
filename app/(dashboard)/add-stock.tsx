@@ -76,29 +76,29 @@ export default function AddStock() {
     return unsubscribe;
   }, [user]);
 
-//   // Fetch items from selected list
-//   useEffect(() => {
-//     if (!user || !selectedListId) {
-//       setListItems([]);
-//       return;
-//     }
-//     const itemsRef = collection(
-//       db,
-//       "users",
-//       user.uid,
-//       "lists",
-//       selectedListId,
-//       "items",
-//     );
-//     const unsubscribe = onSnapshot(itemsRef, (snapshot) => {
-//       const items = snapshot.docs.map((doc: any) => ({
-//         id: doc.id,
-//         ...doc.data(),
-//       }));
-//       setListItems(items);
-//     });
-//     return unsubscribe;
-//   }, [user, selectedListId]);
+  // Fetch items from selected list
+  useEffect(() => {
+    if (!user || !selectedListId) {
+      setListItems([]);
+      return;
+    }
+    const itemsRef = collection(
+      db,
+      "users",
+      user.uid,
+      "lists",
+      selectedListId,
+      "items",
+    );
+    const unsubscribe = onSnapshot(itemsRef, (snapshot) => {
+      const items = snapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setListItems(items);
+    });
+    return unsubscribe;
+  }, [user, selectedListId]);
 
 //   const selectItemFromList = (item: any) => {
 //     setName(item.name || "");
