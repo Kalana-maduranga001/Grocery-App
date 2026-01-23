@@ -24,14 +24,14 @@ export default function ListDetails() {
     );
   }
 
-  // // Wait for listId
-  // if (!listId) {
-  //   return (
-  //     <View className="flex-1 items-center justify-center">
-  //       <Text className="text-red-500 text-lg">No list selected</Text>
-  //     </View>
-  //   );
-  // }
+  // Wait for listId
+  if (!listId) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-red-500 text-lg">No list selected</Text>
+      </View>
+    );
+  }
 
   // // Real-time listener for list and items
   // useEffect(() => {
