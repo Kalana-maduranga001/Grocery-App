@@ -1,51 +1,101 @@
-import { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
-import { useRouter } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
+import { db } from "@/services/firebaseConfig";
+import { showConfirmation, showToast } from "@/utils/notifications";
 import { Ionicons } from "@expo/vector-icons";
-import { showToast, showConfirmation } from "@/utils/notifications";
+import { useRouter } from "expo-router";
+import { collection, onSnapshot, Timestamp } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import {
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 export default function Home() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
-  // Mock data - replace with Firebase later
-  const [groceryLists, setGroceryLists] = useState([
-    { id: "1", name: "Weekly Shopping", itemCount: 12, completedCount: 8 },
-    { id: "2", name: "Party Supplies", itemCount: 5, completedCount: 0 },
-  ]);
+  const [groceryLists, setGroceryLists] = useState<any[]>([]);
+  const [lowStockItems, setLowStockItems] = useState<any[]>([]);
 
-  const [lowStockItems, setLowStockItems] = useState([
-    { id: "1", name: "Rice", quantity: "500g", daysLeft: 2 },
-    { id: "2", name: "Milk", quantity: "1L", daysLeft: 1 },
-    { id: "3", name: "Eggs", quantity: "6 pcs", daysLeft: 3 },
-  ]);
+  // Real-time fetch lists from Firestore
+  useEffect(() => {
+    if (!user) return;
+    const listsRef = collection(db, "users", user.uid, "lists");
+    const unsub = onSnapshot(
+      listsRef,
+      (snap) => {
+        const arr: any[] = [];
+        snap.forEach((d) => {
+          const data = d.data();
+          arr.push({
+            id: d.id,
+            name: data.name || "Untitled",
+            itemCount: 0,
+            completedCount: 0,
+          });
+        });
+        setGroceryLists(arr);
+      },
+      (error) => {
+        console.warn("Lists listener error:", error.message);
+        // Continue gracefully on error
+      },
+    );
+    return () => unsub();
+  }, [user]);
+
+  // Real-time fetch stock from Firestore
+  useEffect(() => {
+    if (!user) return;
+    const stockRef = collection(db, "users", user.uid, "stock");
+    const unsub = onSnapshot(
+      stockRef,
+      (snap) => {
+        const arr: any[] = [];
+        const now = Date.now();
+        snap.forEach((d) => {
+          const data = d.data();
+          if (data.depletionDate) {
+            const dep = (data.depletionDate as Timestamp).toDate().getTime();
+            const daysLeft = Math.ceil((dep - now) / (24 * 60 * 60 * 1000));
+            // Only show items with 2 days or less remaining
+            if (daysLeft <= 2 && daysLeft > 0) {
+              arr.push({
+                id: d.id,
+                name: data.name || "Item",
+                quantity: `${data.quantity || 0} ${data.unit || "units"}`,
+                daysLeft,
+              });
+            }
+          }
+        });
+        setLowStockItems(arr);
+      },
+      (error) => {
+        console.warn("Stock listener error:", error.message);
+        // Continue gracefully on error
+      },
+    );
+    return () => unsub();
+  }, [user]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // TODO: Fetch updated data from Firebase
     setTimeout(() => {
       setRefreshing(false);
-      showToast("success", "Refreshed", "Data updated successfully");
+      showToast("success", "Refreshed", "Data updated");
     }, 1000);
   };
 
   const handleLogout = () => {
-    showConfirmation(
-      "Logout",
-      "Are you sure you want to logout?",
-      async () => {
-        await logout();
-        router.replace("/(auth)/login");
-      }
-    );
+    showConfirmation("Logout", "Are you sure you want to logout?", async () => {
+      await logout();
+      router.replace("/(auth)/login");
+    });
   };
 
   return (
@@ -54,7 +104,9 @@ export default function Home() {
       <View className="bg-green-600 pt-12 pb-6 px-6 rounded-b-3xl shadow-lg">
         <View className="flex-row justify-between items-center mb-4">
           <View>
-            <Text className="text-white text-2xl font-bold">SmartGrocer 🛒</Text>
+            <Text className="text-white text-2xl font-bold">
+              SmartGrocer 🛒
+            </Text>
             <Text className="text-green-100 text-sm mt-1">
               Welcome back, {user?.displayName || "User"}!
             </Text>
@@ -70,11 +122,15 @@ export default function Home() {
         {/* Quick Stats */}
         <View className="flex-row justify-between mt-4">
           <View className="bg-white/20 rounded-2xl p-4 flex-1 mr-2">
-            <Text className="text-white text-3xl font-bold">{groceryLists.length}</Text>
+            <Text className="text-white text-3xl font-bold">
+              {groceryLists.length}
+            </Text>
             <Text className="text-green-100 text-sm mt-1">Active Lists</Text>
           </View>
           <View className="bg-white/20 rounded-2xl p-4 flex-1 ml-2">
-            <Text className="text-white text-3xl font-bold">{lowStockItems.length}</Text>
+            <Text className="text-white text-3xl font-bold">
+              {lowStockItems.length}
+            </Text>
             <Text className="text-green-100 text-sm mt-1">Low Stock</Text>
           </View>
         </View>
@@ -92,8 +148,12 @@ export default function Home() {
         {lowStockItems.length > 0 && (
           <View className="mb-6">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-xl font-bold text-gray-900">⚠️ Low Stock Items</Text>
-              <TouchableOpacity onPress={() => router.push("/(dashboard)/stock")}>
+              <Text className="text-xl font-bold text-gray-900">
+                ⚠️ Low Stock Items
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push("/(dashboard)/stock")}
+              >
                 <Text className="text-green-600 font-semibold">View All</Text>
               </TouchableOpacity>
             </View>
@@ -102,14 +162,26 @@ export default function Home() {
               <TouchableOpacity
                 key={item.id}
                 className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-3 flex-row justify-between items-center"
-                onPress={() => showToast("info", "Stock Alert", `${item.name} is running low`)}
+                onPress={() =>
+                  showToast(
+                    "info",
+                    "Stock Alert",
+                    `${item.name} is running low`,
+                  )
+                }
               >
                 <View className="flex-1">
-                  <Text className="text-gray-900 font-semibold text-base">{item.name}</Text>
-                  <Text className="text-gray-600 text-sm mt-1">Remaining: {item.quantity}</Text>
+                  <Text className="text-gray-900 font-semibold text-base">
+                    {item.name}
+                  </Text>
+                  <Text className="text-gray-600 text-sm mt-1">
+                    Remaining: {item.quantity}
+                  </Text>
                 </View>
                 <View className="bg-orange-500 rounded-full px-3 py-1">
-                  <Text className="text-white font-bold text-xs">{item.daysLeft}d left</Text>
+                  <Text className="text-white font-bold text-xs">
+                    {item.daysLeft}d left
+                  </Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -119,7 +191,9 @@ export default function Home() {
         {/* My Grocery Lists */}
         <View className="mb-6">
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-xl font-bold text-gray-900">📋 My Grocery Lists</Text>
+            <Text className="text-xl font-bold text-gray-900">
+              📋 My Grocery Lists
+            </Text>
             <TouchableOpacity onPress={() => router.push("/(dashboard)/lists")}>
               <Text className="text-green-600 font-semibold">View All</Text>
             </TouchableOpacity>
@@ -137,29 +211,21 @@ export default function Home() {
               }
             >
               <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-gray-900 font-semibold text-base flex-1">{list.name}</Text>
+                <Text className="text-gray-900 font-semibold text-base flex-1">
+                  {list.name}
+                </Text>
                 <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
               </View>
 
               <View className="flex-row justify-between items-center mt-2">
                 <Text className="text-gray-600 text-sm">
-                  {list.completedCount}/{list.itemCount} items completed
+                  {list.itemCount} items
                 </Text>
                 <View className="bg-green-100 rounded-full px-3 py-1">
                   <Text className="text-green-700 font-semibold text-xs">
-                    {Math.round((list.completedCount / list.itemCount) * 100)}%
+                    Active
                   </Text>
                 </View>
-              </View>
-
-              {/* Progress Bar */}
-              <View className="mt-3 bg-gray-200 h-2 rounded-full overflow-hidden">
-                <View
-                  className="bg-green-500 h-full"
-                  style={{
-                    width: `${(list.completedCount / list.itemCount) * 100}%`,
-                  }}
-                />
               </View>
             </TouchableOpacity>
           ))}
@@ -167,7 +233,9 @@ export default function Home() {
 
         {/* Quick Actions */}
         <View className="mb-8">
-          <Text className="text-xl font-bold text-gray-900 mb-3">⚡ Quick Actions</Text>
+          <Text className="text-xl font-bold text-gray-900 mb-3">
+            ⚡ Quick Actions
+          </Text>
 
           <View className="flex-row justify-between">
             <TouchableOpacity
@@ -190,10 +258,10 @@ export default function Home() {
           <View className="flex-row justify-between mt-4">
             <TouchableOpacity
               className="bg-purple-600 rounded-2xl p-4 flex-1 mr-2 items-center"
-              onPress={() => router.push("/(dashboard)/shopping-mode")}
+              onPress={() => router.push("/(dashboard)/stock-goods")}
             >
               <Ionicons name="cart-outline" size={32} color="white" />
-              <Text className="text-white font-semibold mt-2">Shopping</Text>
+              <Text className="text-white font-semibold mt-2">Stock Items</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
