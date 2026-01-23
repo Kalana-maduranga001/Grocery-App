@@ -34,17 +34,17 @@ function onSnapshot(
   return firestoreOnSnapshot(listsRef, callback);
 }
 
-// export default function AddStock() {
-//   const router = useRouter();
-//   const { user } = useAuth();
+export default function AddStock() {
+  const router = useRouter();
+  const { user } = useAuth();
 
-//   const [name, setName] = useState("");
-//   const [quantity, setQuantity] = useState<string>("");
-//   const [unit, setUnit] = useState("");
-//   const [durationDays, setDurationDays] = useState<string>("");
-//   const [selectedDate, setSelectedDate] = useState(new Date());
-//   const [datePickerVisible, setDatePickerVisible] = useState(false);
-//   const [saving, setSaving] = useState(false);
+  const [name, setName] = useState("");
+  const [quantity, setQuantity] = useState<string>("");
+  const [unit, setUnit] = useState("");
+  const [durationDays, setDurationDays] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [saving, setSaving] = useState(false);
 
 //   // Error states for inline validation
 //   const [nameError, setNameError] = useState("");
