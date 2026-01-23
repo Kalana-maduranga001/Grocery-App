@@ -15,14 +15,14 @@ export default function ListDetails() {
   const [items, setItems] = useState<any[]>([]);
   const [listName, setListName] = useState("");
 
-  // // Wait for user
-  // if (!user) {
-  //   return (
-  //     <View className="flex-1 items-center justify-center">
-  //       <Text className="text-gray-500 text-lg">Loading user...</Text>
-  //     </View>
-  //   );
-  // }
+  // Wait for user
+  if (!user) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-gray-500 text-lg">Loading user...</Text>
+      </View>
+    );
+  }
 
   // // Wait for listId
   // if (!listId) {
