@@ -64,27 +64,27 @@ export default function ListDetails() {
     };
   }, [user, listId]);
 
-  // // Delete an item
-  // const deleteItem = (itemId: string) => {
-  //   Alert.alert("Delete Item", "Are you sure you want to delete this item?", [
-  //     { text: "Cancel", style: "cancel" },
-  //     {
-  //       text: "Delete",
-  //       style: "destructive",
-  //       onPress: async () => {
-  //         try {
-  //           await deleteDoc(
-  //             doc(db, "users", user.uid, "lists", listId, "items", itemId),
-  //           );
-  //           showToast("success", "Deleted", "Item deleted successfully");
-  //         } catch (error) {
-  //           console.error(error);
-  //           showToast("error", "Failed", "Could not delete item");
-  //         }
-  //       },
-  //     },
-  //   ]);
-  // };
+  // Delete an item
+  const deleteItem = (itemId: string) => {
+    Alert.alert("Delete Item", "Are you sure you want to delete this item?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteDoc(
+              doc(db, "users", user.uid, "lists", listId, "items", itemId),
+            );
+            showToast("success", "Deleted", "Item deleted successfully");
+          } catch (error) {
+            console.error(error);
+            showToast("error", "Failed", "Could not delete item");
+          }
+        },
+      },
+    ]);
+  };
 
   // return (
   //   <View className="flex-1 bg-gray-50">
