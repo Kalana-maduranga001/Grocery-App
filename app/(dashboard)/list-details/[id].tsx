@@ -45,12 +45,12 @@ export default function ListDetails() {
       "items",
     );
 
-  //   const unsubscribeList = onSnapshot(listRef, (snapshot) => {
-  //     if (snapshot.exists()) {
-  //       const data = snapshot.data();
-  //       setListName(data?.name || "List");
-  //     }
-  //   });
+    const unsubscribeList = onSnapshot(listRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setListName(data?.name || "List");
+      }
+    });
 
   //   const unsubscribeItems = onSnapshot(itemsRef, (snapshot) => {
   //     const userItems: any[] = [];
