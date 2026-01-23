@@ -6,11 +6,11 @@ import { useRouter } from "expo-router";
 import { collection, onSnapshot, Timestamp } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function Home() {
@@ -21,31 +21,76 @@ export default function Home() {
   const [groceryLists, setGroceryLists] = useState<any[]>([]);
   const [lowStockItems, setLowStockItems] = useState<any[]>([]);
 
-  // Real-time fetch lists from Firestore
+  // Real-time fetch lists and their item counts from Firestore
   useEffect(() => {
     if (!user) return;
     const listsRef = collection(db, "users", user.uid, "lists");
-    const unsub = onSnapshot(
+
+    // Track per-list item listeners so we can clean them up on list changes
+    let itemUnsubs: Array<() => void> = [];
+
+    const unsubLists = onSnapshot(
       listsRef,
       (snap) => {
-        const arr: any[] = [];
-        snap.forEach((d) => {
+        // Clear previous item listeners before re-subscribing
+        itemUnsubs.forEach((fn) => fn());
+        itemUnsubs = [];
+
+        if (snap.empty) {
+          setGroceryLists([]);
+          return;
+        }
+
+        // Seed lists without counts first
+        const baseLists = snap.docs.map((d) => {
           const data = d.data();
-          arr.push({
+          return {
             id: d.id,
             name: data.name || "Untitled",
             itemCount: 0,
             completedCount: 0,
-          });
+          };
         });
-        setGroceryLists(arr);
+        setGroceryLists(baseLists);
+
+        // Attach listeners to each list's items to keep counts fresh
+        snap.docs.forEach((d) => {
+          const itemsRef = collection(
+            db,
+            "users",
+            user.uid,
+            "lists",
+            d.id,
+            "items",
+          );
+
+          const unsubItems = onSnapshot(
+            itemsRef,
+            (itemsSnap) => {
+              setGroceryLists((prev) =>
+                prev.map((lst) =>
+                  lst.id === d.id ? { ...lst, itemCount: itemsSnap.size } : lst,
+                ),
+              );
+            },
+            (error) => {
+              console.warn("Items listener error:", error.message);
+            },
+          );
+
+          itemUnsubs.push(unsubItems);
+        });
       },
       (error) => {
         console.warn("Lists listener error:", error.message);
         // Continue gracefully on error
       },
     );
-    return () => unsub();
+
+    return () => {
+      unsubLists();
+      itemUnsubs.forEach((fn) => fn());
+    };
   }, [user]);
 
   // Real-time fetch stock from Firestore
