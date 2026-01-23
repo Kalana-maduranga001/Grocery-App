@@ -3,12 +3,7 @@ import { db } from "@/services/firebaseConfig";
 import { showToast } from "@/utils/notifications";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot
-} from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
@@ -26,24 +21,69 @@ export default function Lists() {
     );
   }
 
-  // Real-time Firestore listener for user lists
+  // Real-time lists with per-list item counts
   useEffect(() => {
     const listsRef = collection(db, "users", user.uid, "lists");
-    const unsubscribe = onSnapshot(
+
+    // Track item listeners for cleanup
+    let itemUnsubs: Array<() => void> = [];
+
+    const unsubLists = onSnapshot(
       listsRef,
       (snapshot) => {
-        const userLists: any[] = [];
-        snapshot.forEach((doc) =>
-          userLists.push({ id: doc.id, ...doc.data() }),
-        );
-        setLists(userLists);
+        // Remove old item listeners before re-attaching
+        itemUnsubs.forEach((fn) => fn());
+        itemUnsubs = [];
+
+        if (snapshot.empty) {
+          setLists([]);
+          return;
+        }
+
+        // Seed lists without counts
+        const base = snapshot.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as any),
+          itemCount: 0,
+        }));
+        setLists(base);
+
+        // Attach item listeners per list to keep counts fresh
+        snapshot.docs.forEach((d) => {
+          const itemsRef = collection(
+            db,
+            "users",
+            user.uid,
+            "lists",
+            d.id,
+            "items",
+          );
+
+          const unsubItems = onSnapshot(
+            itemsRef,
+            (itemsSnap) => {
+              setLists((prev) =>
+                prev.map((lst) =>
+                  lst.id === d.id ? { ...lst, itemCount: itemsSnap.size } : lst,
+                ),
+              );
+            },
+            (error) => console.warn("Items listener error:", error.message),
+          );
+
+          itemUnsubs.push(unsubItems);
+        });
       },
       (error) => {
         console.error("Failed to fetch lists:", error);
         showToast("error", "Error", "Could not fetch lists");
       },
     );
-    return () => unsubscribe();
+
+    return () => {
+      unsubLists();
+      itemUnsubs.forEach((fn) => fn());
+    };
   }, [user]);
 
   // Delete a list
