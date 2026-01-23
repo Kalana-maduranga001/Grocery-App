@@ -129,6 +129,10 @@ export async function createStockNotification(
   isExpired: boolean = false,
 ) {
   try {
+    console.log(
+      `[NOTIFICATION] Attempting to create for ${itemName}, days: ${daysRemaining}, expired: ${isExpired}`,
+    );
+
     // Check if unseen notification already exists for this stock item
     const notificationsRef = collection(db, "users", userId, "notifications");
     const q = query(
@@ -140,6 +144,9 @@ export async function createStockNotification(
 
     // If unseen notification already exists, don't create duplicate
     if (existingSnap.size > 0) {
+      console.log(
+        `[NOTIFICATION] Duplicate avoided - unseen notification already exists for ${itemName}`,
+      );
       return;
     }
 
@@ -148,7 +155,7 @@ export async function createStockNotification(
       ? `⚠️ ${itemName} has EXPIRED and needs to be removed from stock!`
       : `${itemName} is running low and will be depleted soon.`;
 
-    await addDoc(notificationsRef, {
+    const newDoc = await addDoc(notificationsRef, {
       stockItemId,
       itemName,
       message,
@@ -157,7 +164,11 @@ export async function createStockNotification(
       seen: false,
       createdAt: serverTimestamp(),
     });
+
+    console.log(
+      `[NOTIFICATION] ✅ Created successfully for ${itemName}, ID: ${newDoc.id}`,
+    );
   } catch (error) {
-    console.error("Failed to create stock notification:", error);
+    console.error(`[NOTIFICATION] ❌ Failed to create for ${itemName}:`, error);
   }
 }

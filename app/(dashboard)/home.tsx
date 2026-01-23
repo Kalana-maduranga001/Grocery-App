@@ -1,6 +1,10 @@
 import { useAuth } from "@/hooks/useAuth";
 import { db } from "@/services/firebaseConfig";
-import { showConfirmation, showToast } from "@/utils/notifications";
+import {
+  createStockNotification,
+  showConfirmation,
+  showToast,
+} from "@/utils/notifications";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { collection, onSnapshot, Timestamp } from "firebase/firestore";
@@ -102,12 +106,47 @@ export default function Home() {
       (snap) => {
         const arr: any[] = [];
         const now = Date.now();
+
+        console.log(
+          `[HOME] Checking ${snap.size} stock items for notifications...`,
+        );
+
         snap.forEach((d) => {
           const data = d.data();
           if (data.depletionDate) {
             const dep = (data.depletionDate as Timestamp).toDate().getTime();
             const daysLeft = Math.ceil((dep - now) / (24 * 60 * 60 * 1000));
-            // Only show items with 2 days or less remaining
+
+            console.log(`[HOME] Item: ${data.name}, Days left: ${daysLeft}`);
+
+            // Create notifications for expired or running low items
+            if (daysLeft <= 0) {
+              // Item has EXPIRED
+              console.log(
+                `[HOME] Creating EXPIRED notification for ${data.name}`,
+              );
+              createStockNotification(
+                user.uid,
+                d.id,
+                data.name || "Item",
+                daysLeft,
+                true, // isExpired
+              );
+            } else if (daysLeft <= 2) {
+              // Item has 2 days or less (TESTING - broader criteria)
+              console.log(
+                `[HOME] Creating LOW STOCK notification for ${data.name}`,
+              );
+              createStockNotification(
+                user.uid,
+                d.id,
+                data.name || "Item",
+                daysLeft,
+                false,
+              );
+            }
+
+            // Only show items with 2 days or less remaining in home screen
             if (daysLeft <= 2 && daysLeft > 0) {
               arr.push({
                 id: d.id,
@@ -118,6 +157,8 @@ export default function Home() {
             }
           }
         });
+
+        console.log(`[HOME] Found ${arr.length} low stock items for display`);
         setLowStockItems(arr);
       },
       (error) => {
