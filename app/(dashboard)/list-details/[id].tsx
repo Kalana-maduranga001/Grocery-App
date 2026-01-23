@@ -52,17 +52,17 @@ export default function ListDetails() {
       }
     });
 
-  //   const unsubscribeItems = onSnapshot(itemsRef, (snapshot) => {
-  //     const userItems: any[] = [];
-  //     snapshot.forEach((doc) => userItems.push({ id: doc.id, ...doc.data() }));
-  //     setItems(userItems);
-  //   });
+    const unsubscribeItems = onSnapshot(itemsRef, (snapshot) => {
+      const userItems: any[] = [];
+      snapshot.forEach((doc) => userItems.push({ id: doc.id, ...doc.data() }));
+      setItems(userItems);
+    });
 
-  //   return () => {
-  //     unsubscribeList();
-  //     unsubscribeItems();
-  //   };
-  // }, [user, listId]);
+    return () => {
+      unsubscribeList();
+      unsubscribeItems();
+    };
+  }, [user, listId]);
 
   // // Delete an item
   // const deleteItem = (itemId: string) => {
