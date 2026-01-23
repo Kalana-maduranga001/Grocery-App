@@ -46,20 +46,20 @@ export default function AddStock() {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [saving, setSaving] = useState(false);
 
-//   // Error states for inline validation
-//   const [nameError, setNameError] = useState("");
-//   const [quantityError, setQuantityError] = useState("");
-//   const [unitError, setUnitError] = useState("");
-//   const [durationError, setDurationError] = useState("");
+  // Error states for inline validation
+  const [nameError, setNameError] = useState("");
+  const [quantityError, setQuantityError] = useState("");
+  const [unitError, setUnitError] = useState("");
+  const [durationError, setDurationError] = useState("");
 
-//   // List selection modal state
-//   const [showListModal, setShowListModal] = useState(false);
-//   const [pendingStockData, setPendingStockData] = useState<any>(null);
+  // List selection modal state
+  const [showListModal, setShowListModal] = useState(false);
+  const [pendingStockData, setPendingStockData] = useState<any>(null);
 
-//   // Add lists state and selectedListId state
-//   const [lists, setLists] = useState<{ id: string; name: string }[]>([]);
-//   const [selectedListId, setSelectedListId] = useState<string | null>(null);
-//   const [listItems, setListItems] = useState<any[]>([]);
+  // Add lists state and selectedListId state
+  const [lists, setLists] = useState<{ id: string; name: string }[]>([]);
+  const [selectedListId, setSelectedListId] = useState<string | null>(null);
+  const [listItems, setListItems] = useState<any[]>([]);
 
 //   // Fetch lists from Firestore
 //   useEffect(() => {
