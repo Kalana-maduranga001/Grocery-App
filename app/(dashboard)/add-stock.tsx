@@ -112,19 +112,19 @@ export default function AddStock() {
     showToast("success", "Item loaded", `${item.name} details filled`);
   };
 
-//   const clearForm = () => {
-//     setName("");
-//     setQuantity("");
-//     setUnit("units");
-//     setDurationDays("");
-//     setSelectedDate(new Date());
-//     setSelectedListId(null);
-//     setNameError("");
-//     setQuantityError("");
-//     setUnitError("");
-//     setDurationError("");
-//     showToast("info", "Form cleared", "All fields have been reset");
-//   };
+  const clearForm = () => {
+    setName("");
+    setQuantity("");
+    setUnit("units");
+    setDurationDays("");
+    setSelectedDate(new Date());
+    setSelectedListId(null);
+    setNameError("");
+    setQuantityError("");
+    setUnitError("");
+    setDurationError("");
+    showToast("info", "Form cleared", "All fields have been reset");
+  };
 
 //   const handleDateSelect = (date: Date) => {
 //     setSelectedDate(date);
