@@ -27,12 +27,12 @@ import {
 } from "react-native";
 
 // Wrapper for Firestore's onSnapshot to match the expected signature
-// function onSnapshot(
-//   listsRef: CollectionReference<DocumentData, DocumentData>,
-//   callback: (listsSnap: any) => void,
-// ) {
-//   return firestoreOnSnapshot(listsRef, callback);
-// }
+function onSnapshot(
+  listsRef: CollectionReference<DocumentData, DocumentData>,
+  callback: (listsSnap: any) => void,
+) {
+  return firestoreOnSnapshot(listsRef, callback);
+}
 
 // export default function AddStock() {
 //   const router = useRouter();
