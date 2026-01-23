@@ -12,6 +12,14 @@ export default function Lists() {
   const { user } = useAuth();
   const [lists, setLists] = useState<any[]>([]);
 
+  const handleBack = () => {
+    if (router.canGoBack && router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/(dashboard)/home");
+    }
+  };
+
   // Early return if user not loaded yet
   if (!user) {
     return (
@@ -112,7 +120,7 @@ export default function Lists() {
       {/* Header */}
       <View className="bg-green-600 pt-12 pb-6 px-6 rounded-b-3xl shadow-lg">
         <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3">
+          <TouchableOpacity onPress={handleBack} className="mr-3">
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
           <Text className="text-white text-2xl font-bold">

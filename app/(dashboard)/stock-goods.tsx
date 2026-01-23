@@ -57,6 +57,14 @@ export default function StockGoods() {
   const [allItems, setAllItems] = useState<ItemWithDetails[]>([]);
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
 
+  const handleBack = () => {
+    if (router.canGoBack && router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/(dashboard)/home");
+    }
+  };
+
   // Edit modal state
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -272,7 +280,7 @@ export default function StockGoods() {
     <View className="flex-1 bg-gray-50">
       <View className="bg-green-600 pt-12 pb-6 px-6 rounded-b-3xl shadow-lg">
         <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3">
+          <TouchableOpacity onPress={handleBack} className="mr-3">
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
           <Text className="text-white text-2xl font-bold">📦 All Items</Text>

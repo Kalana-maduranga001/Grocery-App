@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 
 export default function DashboardLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack initialRouteName="home" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="home" />
       <Stack.Screen name="lists" />
       <Stack.Screen name="create-list" />

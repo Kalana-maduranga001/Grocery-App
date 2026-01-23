@@ -1,21 +1,39 @@
-import { useAuth } from '@/hooks/useAuth'
-import { Redirect } from 'expo-router'
-import { View, ActivityIndicator } from 'react-native'
+import LoadingScreen from "@/components/LoadingScreen";
+import { useAuth } from "@/hooks/useAuth";
+import { Redirect } from "expo-router";
+import { useEffect, useState } from "react";
 
-export default function Index () {
-  const { user, loading } = useAuth()
+export default function Index() {
+  const { user, loading } = useAuth();
+  const [showLoading, setShowLoading] = useState(true);
 
-  if (loading) {
-    return (
-      <View className='flex-1 justify-center items-center bg-gray-50'>
-        <ActivityIndicator size='large' color='#4ade80' />
-      </View>
-    )
+  useEffect(() => {
+    // Force loading screen to show for minimum 10 seconds
+    const timer = setTimeout(() => {
+      console.log("[INDEX] 10s timer finished");
+      setShowLoading(false);
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Still loading auth or showing splash screen
+  if (loading || showLoading) {
+    console.log(
+      "[INDEX] Showing loading screen - loading:",
+      loading,
+      "showLoading:",
+      showLoading,
+    );
+    return <LoadingScreen />;
   }
+
+  // Auth resolved and loading done - redirect
+  console.log("[INDEX] Redirecting - user exists:", !!user);
 
   if (user) {
-    return <Redirect href='/(dashboard)/home' />
-  } else {
-    return <Redirect href='/(auth)/login' />
+    return <Redirect href="/(dashboard)/home" />;
   }
+
+  return <Redirect href="/(auth)/login" />;
 }

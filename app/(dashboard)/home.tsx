@@ -226,25 +226,28 @@ export default function Home() {
       <ScrollView
         className="flex-1 px-6 mt-4"
         showsVerticalScrollIndicator={false}
+        scrollEnabled={true}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Low Stock Alert */}
+        {/* Low Stock Alert - Show only first 2 items as preview, rest in separate screen */}
         {lowStockItems.length > 0 && (
           <View className="mb-6">
             <View className="flex-row justify-between items-center mb-3">
               <Text className="text-xl font-bold text-gray-900">
-                ⚠️ Low Stock Items
+                ⚠️ Low Stock Alert
               </Text>
               <TouchableOpacity
                 onPress={() => router.push("/(dashboard)/stock")}
               >
-                <Text className="text-green-600 font-semibold">View All</Text>
+                <Text className="text-green-600 font-semibold">
+                  View All ({lowStockItems.length})
+                </Text>
               </TouchableOpacity>
             </View>
 
-            {lowStockItems.map((item) => (
+            {lowStockItems.slice(0, 2).map((item) => (
               <TouchableOpacity
                 key={item.id}
                 className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-3 flex-row justify-between items-center"
