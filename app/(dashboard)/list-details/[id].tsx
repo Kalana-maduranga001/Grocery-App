@@ -9,11 +9,11 @@ import { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function ListDetails() {
-  // const router = useRouter();
-  // const { id: listId } = useLocalSearchParams<{ id: string }>(); // ✅ Get dynamic id
-  // const { user } = useAuth();
-  // const [items, setItems] = useState<any[]>([]);
-  // const [listName, setListName] = useState("");
+  const router = useRouter();
+  const { id: listId } = useLocalSearchParams<{ id: string }>(); // ✅ Get dynamic id
+  const { user } = useAuth();
+  const [items, setItems] = useState<any[]>([]);
+  const [listName, setListName] = useState("");
 
   // // Wait for user
   // if (!user) {
