@@ -7,6 +7,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
+  StyleSheet,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useLoader } from "@/hooks/useLoader";
@@ -14,6 +16,35 @@ import Toast from "react-native-toast-message";
 import { registerUser } from "@/services/authService";
 import GlassButton from "@/components/GlassButton";
 import PasswordInput from "@/components/PasswordInput";
+
+// Common font style helper (matching home page)
+const fontStyles = {
+  heavy: Platform.select({
+    ios: { fontFamily: "System", fontWeight: "900" as const },
+    android: { fontFamily: "sans-serif-black", fontWeight: "bold" as const },
+    default: { fontFamily: "System", fontWeight: "900" as const },
+  }),
+  bold: Platform.select({
+    ios: { fontFamily: "System", fontWeight: "800" as const },
+    android: { fontFamily: "sans-serif-black", fontWeight: "bold" as const },
+    default: { fontFamily: "System", fontWeight: "800" as const },
+  }),
+  semibold: Platform.select({
+    ios: { fontFamily: "System", fontWeight: "700" as const },
+    android: { fontFamily: "sans-serif-medium", fontWeight: "bold" as const },
+    default: { fontFamily: "System", fontWeight: "700" as const },
+  }),
+  medium: Platform.select({
+    ios: { fontFamily: "System", fontWeight: "600" as const },
+    android: { fontFamily: "sans-serif-medium" as const },
+    default: { fontFamily: "System", fontWeight: "600" as const },
+  }),
+  regular: Platform.select({
+    ios: { fontFamily: "System", fontWeight: "500" as const },
+    android: { fontFamily: "sans-serif" as const },
+    default: { fontFamily: "System", fontWeight: "500" as const },
+  }),
+};
 
 export default function Register() {
   const router = useRouter();
@@ -117,34 +148,44 @@ export default function Register() {
   // Success Screen - Display success message before redirect
   if (showSuccess) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 p-6" pointerEvents="none">
-        <View className="w-full bg-white/90 rounded-2xl p-8 shadow-lg items-center">
+      <View style={styles.successContainer} pointerEvents="none">
+        {/* Background Decorations */}
+        <View style={styles.backgroundDecor}>
+          <View style={[styles.circle, styles.circleTopLeft1]} />
+          <View style={[styles.circle, styles.circleTopLeft2]} />
+          <View style={[styles.circle, styles.circleTopRight1]} />
+          <View style={[styles.circle, styles.circleBottomLeft1]} />
+          <View style={[styles.circle, styles.circleBottomRight1]} />
+          <View style={[styles.circle, styles.circleBottomRight2]} />
+        </View>
+
+        <View style={styles.successCard}>
           {/* Success Icon */}
-          <View className="w-24 h-24 bg-green-100 rounded-full items-center justify-center mb-6">
-            <Text className="text-6xl">✓</Text>
+          <View style={styles.successIcon}>
+            <Text style={styles.successIconText}>✓</Text>
           </View>
           
           {/* Success Title */}
-          <Text className="text-3xl font-bold mb-4 text-center text-gray-900">
+          <Text style={styles.successTitle}>
             Registration Successful!
           </Text>
           
           {/* Welcome Message */}
-          <Text className="text-xl font-semibold text-green-600 text-center mb-4">
+          <Text style={styles.welcomeMessage}>
             Welcome to SmartGrocer! 🛒
           </Text>
           
           {/* Success Description */}
-          <Text className="text-lg text-gray-600 text-center mb-8 px-4">
+          <Text style={styles.successDescription}>
             Your account has been created successfully.{"\n"}
             You can now manage your grocery lists and stock inventory.{"\n\n"}
             Redirecting to login page...
           </Text>
           
           {/* Loading Indicator */}
-          <ActivityIndicator size="large" color="#10b981" />
+          <ActivityIndicator size="large" color="#FF6B00" />
           
-          <Text className="text-sm text-gray-500 mt-4">
+          <Text style={styles.waitText}>
             Please wait a moment...
           </Text>
         </View>
@@ -158,29 +199,37 @@ export default function Register() {
   // Registration Form
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+      <View style={styles.container}>
+        {/* Background Decorations */}
+        <View style={styles.backgroundDecor}>
+          <View style={[styles.circle, styles.circleTopLeft1]} />
+          <View style={[styles.circle, styles.circleTopLeft2]} />
+          <View style={[styles.circle, styles.circleTopRight1]} />
+          <View style={[styles.circle, styles.circleBottomLeft1]} />
+          <View style={[styles.circle, styles.circleBottomRight1]} />
+          <View style={[styles.circle, styles.circleBottomRight2]} />
+        </View>
+
         <View 
-          className="w-full bg-white/90 rounded-2xl p-8 shadow-lg"
+          style={styles.card}
           pointerEvents={isFormDisabled ? "none" : "auto"}
         >
           {/* App Title */}
-          <Text className="text-3xl font-bold mb-2 text-center text-gray-900">
-            SmartGrocer
-          </Text>
-          <Text className="text-base text-gray-600 mb-6 text-center">
-            Create your account
-          </Text>
+          <Text style={styles.appTitle}>SmartGrocer 🛒</Text>
+          
+          <Text style={styles.title}>Register</Text>
+          
+          <Text style={styles.subtitle}>Create your account to get started</Text>
 
           {/* Full Name Input */}
           <TextInput
             placeholder="Full Name"
             value={fullName}
             onChangeText={setFullName}
-            placeholderTextColor="#6B7280"
+            placeholderTextColor="rgba(255, 228, 204, 0.4)"
             autoCapitalize="words"
             editable={!isFormDisabled}
-            className="border border-gray-300 p-3 mb-4 rounded-xl bg-white"
-            style={{ opacity: isFormDisabled ? 0.5 : 1 }}
+            style={[styles.input, { opacity: isFormDisabled ? 0.5 : 1 }]}
           />
 
           {/* Email Input */}
@@ -188,13 +237,12 @@ export default function Register() {
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
-            placeholderTextColor="#6B7280"
+            placeholderTextColor="rgba(255, 228, 204, 0.4)"
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
             editable={!isFormDisabled}
-            className="border border-gray-300 p-3 mb-4 rounded-xl bg-white"
-            style={{ opacity: isFormDisabled ? 0.5 : 1 }}
+            style={[styles.input, { opacity: isFormDisabled ? 0.5 : 1 }]}
           />
 
           {/* Password Input */}
@@ -223,14 +271,14 @@ export default function Register() {
           />
 
           {/* Login Link */}
-          <View className="flex-row justify-center mt-4">
-            <Text className="text-gray-700 text-base">Already have an account? </Text>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Already have an account? </Text>
             <TouchableOpacity 
               onPress={() => router.replace("/(auth)/login")}
               disabled={isFormDisabled}
-              style={{ opacity: isFormDisabled ? 0.5 : 1 }}
+              style={[styles.loginButton, { opacity: isFormDisabled ? 0.5 : 1 }]}
             >
-              <Text className="text-blue-600 font-semibold text-base">Login</Text>
+              <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -238,3 +286,204 @@ export default function Register() {
     </TouchableWithoutFeedback>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "#3D2417",
+  },
+  successContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#3D2417",
+    padding: 24,
+  },
+  backgroundDecor: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  circle: {
+    position: "absolute",
+    borderRadius: 9999,
+    backgroundColor: "rgba(255, 107, 0, 0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 107, 0, 0.12)",
+  },
+  circleTopLeft1: {
+    top: -60,
+    left: -60,
+    width: 180,
+    height: 180,
+  },
+  circleTopLeft2: {
+    top: 40,
+    left: 30,
+    width: 100,
+    height: 100,
+  },
+  circleTopRight1: {
+    top: -40,
+    right: -40,
+    width: 150,
+    height: 150,
+  },
+  circleBottomLeft1: {
+    bottom: -50,
+    left: -50,
+    width: 160,
+    height: 160,
+  },
+  circleBottomRight1: {
+    bottom: -70,
+    right: -70,
+    width: 200,
+    height: 200,
+  },
+  circleBottomRight2: {
+    bottom: 100,
+    right: 50,
+    width: 80,
+    height: 80,
+  },
+  card: {
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderRadius: 24,
+    padding: 32,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.18)",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  appTitle: {
+    color: "#FFFFFF",
+    fontSize: 32,
+    letterSpacing: 0.8,
+    ...fontStyles.heavy,
+    textShadowColor: "rgba(255, 107, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 28,
+    ...fontStyles.bold,
+    marginBottom: 8,
+    textAlign: "center",
+    color: "#FFFFFF",
+    letterSpacing: 0.5,
+  },
+  subtitle: {
+    color: "#FFE4CC",
+    fontSize: 14,
+    letterSpacing: 0.3,
+    ...fontStyles.regular,
+    opacity: 0.8,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  input: {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+    color: "#FFFFFF",
+    fontSize: 16,
+    ...fontStyles.medium,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  footerText: {
+    color: "#FFE4CC",
+    fontSize: 15,
+    ...fontStyles.regular,
+  },
+  loginButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 140, 66, 0.2)",
+  },
+  loginButtonText: {
+    color: "#FF8C42",
+    ...fontStyles.bold,
+    fontSize: 15,
+    letterSpacing: 0.3,
+  },
+  // Success Screen Styles
+  successCard: {
+    width: "100%",
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderRadius: 24,
+    padding: 32,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.18)",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  successIcon: {
+    width: 96,
+    height: 96,
+    backgroundColor: "rgba(76, 175, 80, 0.2)",
+    borderRadius: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: "rgba(76, 175, 80, 0.4)",
+  },
+  successIconText: {
+    fontSize: 48,
+    color: "#4CAF50",
+    ...fontStyles.bold,
+  },
+  successTitle: {
+    fontSize: 28,
+    ...fontStyles.bold,
+    marginBottom: 16,
+    textAlign: "center",
+    color: "#FFFFFF",
+    letterSpacing: 0.5,
+  },
+  welcomeMessage: {
+    fontSize: 20,
+    ...fontStyles.semibold,
+    color: "#4CAF50",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  successDescription: {
+    fontSize: 15,
+    color: "#FFE4CC",
+    textAlign: "center",
+    marginBottom: 32,
+    paddingHorizontal: 16,
+    lineHeight: 22,
+    ...fontStyles.regular,
+  },
+  waitText: {
+    fontSize: 14,
+    color: "#FFE4CC",
+    marginTop: 16,
+    opacity: 0.7,
+    ...fontStyles.regular,
+  },
+});

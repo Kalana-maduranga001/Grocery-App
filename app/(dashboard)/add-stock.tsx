@@ -24,7 +24,37 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  StyleSheet,
 } from "react-native";
+
+// Common font style helper (matching home page)
+const fontStyles = {
+  heavy: Platform.select({
+    ios: { fontFamily: "System", fontWeight: "900" as const },
+    android: { fontFamily: "sans-serif-black", fontWeight: "bold" as const },
+    default: { fontFamily: "System", fontWeight: "900" as const },
+  }),
+  bold: Platform.select({
+    ios: { fontFamily: "System", fontWeight: "800" as const },
+    android: { fontFamily: "sans-serif-black", fontWeight: "bold" as const },
+    default: { fontFamily: "System", fontWeight: "800" as const },
+  }),
+  semibold: Platform.select({
+    ios: { fontFamily: "System", fontWeight: "700" as const },
+    android: { fontFamily: "sans-serif-medium", fontWeight: "bold" as const },
+    default: { fontFamily: "System", fontWeight: "700" as const },
+  }),
+  medium: Platform.select({
+    ios: { fontFamily: "System", fontWeight: "600" as const },
+    android: { fontFamily: "sans-serif-medium" as const },
+    default: { fontFamily: "System", fontWeight: "600" as const },
+  }),
+  regular: Platform.select({
+    ios: { fontFamily: "System", fontWeight: "500" as const },
+    android: { fontFamily: "sans-serif" as const },
+    default: { fontFamily: "System", fontWeight: "500" as const },
+  }),
+};
 
 // Wrapper for Firestore's onSnapshot to match the expected signature
 function onSnapshot(
@@ -245,7 +275,7 @@ export default function AddStock() {
       setSaving(true);
       const now = new Date();
       const depletion = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-      const remindDaysBefore = Math.min(2, days); // remind at most 2 days before
+      const remindDaysBefore = Math.min(2, days);
       const remindAt = new Date(
         depletion.getTime() - remindDaysBefore * 24 * 60 * 60 * 1000,
       );
@@ -262,7 +292,6 @@ export default function AddStock() {
         reminderId: null,
       });
 
-      // If a list was selected, also add/update the item in that list
       if (selectedListId) {
         try {
           const itemsRef = collection(
@@ -274,13 +303,11 @@ export default function AddStock() {
             "items",
           );
 
-          // Check if item already exists in the list
           const existingItem = listItems.find(
             (item) => item.name.toLowerCase() === trimmed.toLowerCase(),
           );
 
           if (existingItem) {
-            // Update existing item
             const itemDocRef = doc(
               db,
               "users",
@@ -297,7 +324,6 @@ export default function AddStock() {
               expectedDurationDays: days,
             });
           } else {
-            // Create new item in list
             await addDoc(itemsRef, {
               name: trimmed,
               quantity: qty,
@@ -310,16 +336,12 @@ export default function AddStock() {
           }
         } catch (listError) {
           console.error("Failed to update list:", listError);
-          // Don't fail the stock save if list update fails
         }
       }
 
       const reminderId = await scheduleStockReminder(trimmed, remindAt);
       if (reminderId) {
-        // best-effort update with reminderId
-        // avoid blocking UX if it fails
         try {
-          // Firestore lite update without read
           await (
             await import("firebase/firestore")
           ).updateDoc(docRef, { reminderId });
@@ -355,42 +377,55 @@ export default function AddStock() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <View className="bg-green-600 pt-12 pb-6 px-6 rounded-b-3xl shadow-lg">
-        <View className="flex-row items-center">
-          <TouchableOpacity onPress={handleBack} className="mr-3">
-            <Ionicons name="arrow-back" size={24} color="white" />
+    <View style={styles.container}>
+      {/* Background Decorations */}
+      <View style={styles.backgroundDecor}>
+        <View style={[styles.circle, styles.circleTopLeft1]} />
+        <View style={[styles.circle, styles.circleTopRight1]} />
+        <View style={[styles.circle, styles.circleBottomLeft1]} />
+        <View style={[styles.circle, styles.circleBottomRight1]} />
+      </View>
+
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#FFE4CC" />
           </TouchableOpacity>
-          <Text className="text-white text-2xl font-bold">Add Stock</Text>
+          <Text style={styles.headerTitle}>Add Stock</Text>
         </View>
       </View>
 
-      <ScrollView className="mt-8 px-6">
-        <Text className="text-gray-900 font-semibold mb-2">Item Name</Text>
-        <TextInput
-          className={`bg-white border rounded-xl p-4 ${
-            nameError ? "border-red-500" : "border-gray-200"
-          }`}
-          placeholder="e.g. Rice"
-          placeholderTextColor="#9ca3af"
-          value={name}
-          onChangeText={(text) => {
-            setName(text);
-            if (nameError) setNameError("");
-          }}
-        />
-        {nameError ? (
-          <Text className="text-red-500 text-sm mt-1 ml-1">{nameError}</Text>
-        ) : null}
-
-        <View className="mt-4">
-          <Text className="text-gray-900 font-semibold mb-2">Quantity</Text>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Item Name */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Item Name</Text>
           <TextInput
-            className={`bg-white border rounded-xl p-4 ${
-              quantityError ? "border-red-500" : "border-gray-200"
-            }`}
+            style={[styles.input, nameError && styles.inputError]}
+            placeholder="e.g. Rice"
+            placeholderTextColor="rgba(255, 228, 204, 0.4)"
+            value={name}
+            onChangeText={(text) => {
+              setName(text);
+              if (nameError) setNameError("");
+            }}
+          />
+          {nameError ? (
+            <Text style={styles.errorText}>{nameError}</Text>
+          ) : null}
+        </View>
+
+        {/* Quantity */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Quantity</Text>
+          <TextInput
+            style={[styles.input, quantityError && styles.inputError]}
             placeholder="e.g. 5"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor="rgba(255, 228, 204, 0.4)"
             keyboardType="numeric"
             value={quantity}
             onChangeText={(text) => {
@@ -399,20 +434,17 @@ export default function AddStock() {
             }}
           />
           {quantityError ? (
-            <Text className="text-red-500 text-sm mt-1 ml-1">
-              {quantityError}
-            </Text>
+            <Text style={styles.errorText}>{quantityError}</Text>
           ) : null}
         </View>
 
-        <View className="mt-4">
-          <Text className="text-gray-900 font-semibold mb-2">Unit</Text>
+        {/* Unit */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Unit</Text>
           <TextInput
-            className={`bg-white border rounded-xl p-4 ${
-              unitError ? "border-red-500" : "border-gray-200"
-            }`}
+            style={[styles.input, unitError && styles.inputError]}
             placeholder="kg, L, pcs, packs, bottles, boxes"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor="rgba(255, 228, 204, 0.4)"
             value={unit}
             onChangeText={(text) => {
               setUnit(text);
@@ -420,35 +452,32 @@ export default function AddStock() {
             }}
           />
           {unitError ? (
-            <Text className="text-red-500 text-sm mt-1 ml-1">{unitError}</Text>
+            <Text style={styles.errorText}>{unitError}</Text>
           ) : null}
         </View>
 
-        <View className="mt-4">
-          <Text className="text-gray-900 font-semibold mb-2">
-            Select from Your Lists
-          </Text>
+        {/* Select from Lists */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Select from Your Lists</Text>
           {lists.length === 0 ? (
-            <View className="bg-gray-100 rounded-xl p-4">
-              <Text className="text-gray-500 text-center">
-                No lists available
-              </Text>
+            <View style={styles.emptyListsContainer}>
+              <Text style={styles.emptyListsText}>No lists available</Text>
             </View>
           ) : (
-            <View className="bg-white border border-gray-200 rounded-xl p-3">
-              <Text className="text-gray-600 text-sm mb-2">Choose a list:</Text>
-              <ScrollView className="max-h-32 mb-2">
+            <View style={styles.listsContainer}>
+              <Text style={styles.listsLabel}>Choose a list:</Text>
+              <ScrollView style={styles.listsScroll}>
                 {lists.map((list) => (
                   <TouchableOpacity
                     key={list.id}
-                    className="flex-row justify-between items-center py-2 px-2 rounded-lg"
-                    style={{
-                      backgroundColor:
-                        selectedListId === list.id ? "#dcfce7" : "transparent",
-                    }}
+                    style={[
+                      styles.listItem,
+                      selectedListId === list.id && styles.listItemSelected,
+                    ]}
                     onPress={() => setSelectedListId(list.id)}
+                    activeOpacity={0.7}
                   >
-                    <Text className="text-gray-900">{list.name}</Text>
+                    <Text style={styles.listItemText}>{list.name}</Text>
                     <Ionicons
                       name={
                         selectedListId === list.id
@@ -456,32 +485,27 @@ export default function AddStock() {
                           : "radio-button-off"
                       }
                       size={20}
-                      color="#16a34a"
+                      color="#FF6B00"
                     />
                   </TouchableOpacity>
                 ))}
               </ScrollView>
               {selectedListId && (
-                <View className="mt-2 pt-2 border-t border-gray-200">
-                  <Text className="text-gray-600 text-sm mb-2">
-                    Items in this list:
-                  </Text>
+                <View style={styles.listItemsContainer}>
+                  <Text style={styles.listsLabel}>Items in this list:</Text>
                   {listItems.length === 0 ? (
-                    <Text className="text-gray-400 text-sm">
-                      No items in this list
-                    </Text>
+                    <Text style={styles.noItemsText}>No items in this list</Text>
                   ) : (
-                    <ScrollView className="max-h-32">
+                    <ScrollView style={styles.itemsScroll}>
                       {listItems.map((item) => (
                         <TouchableOpacity
                           key={item.id}
-                          className="bg-green-50 rounded-lg p-3 mb-2 border border-green-200"
+                          style={styles.listItemCard}
                           onPress={() => selectItemFromList(item)}
+                          activeOpacity={0.7}
                         >
-                          <Text className="text-gray-900 font-semibold">
-                            {item.name}
-                          </Text>
-                          <Text className="text-gray-500 text-xs mt-1">
+                          <Text style={styles.listItemName}>{item.name}</Text>
+                          <Text style={styles.listItemDetails}>
                             {item.quantity || 1} {item.unit || "units"} •{" "}
                             {item.expectedDurationDays || 30} days
                           </Text>
@@ -495,111 +519,114 @@ export default function AddStock() {
           )}
         </View>
 
-        <View className="mt-4">
-          <Text className="text-gray-900 font-semibold mb-2">
-            Expected Duration (days)
-          </Text>
+        {/* Duration Picker */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Expected Duration (days)</Text>
           <TouchableOpacity
-            className={`bg-white border rounded-xl p-4 flex-row items-center justify-between ${
-              durationError ? "border-red-500" : "border-gray-200"
-            }`}
+            style={[styles.datePickerButton, durationError && styles.inputError]}
             onPress={() => {
               setDatePickerVisible(true);
               if (durationError) setDurationError("");
             }}
+            activeOpacity={0.7}
           >
-            <View className="flex-1">
-              <Text className="text-gray-900 font-medium">
-                {durationDays ? `${durationDays} days` : "Select expiry date"}
-              </Text>
-              <Text className="text-gray-500 text-xs mt-1">
-                {selectedDate.toDateString()}
-              </Text>
+            <View style={styles.datePickerContent}>
+              <View>
+                <Text style={styles.datePickerText}>
+                  {durationDays ? `${durationDays} days` : "Select expiry date"}
+                </Text>
+                <Text style={styles.datePickerSubtext}>
+                  {selectedDate.toDateString()}
+                </Text>
+              </View>
+              <Ionicons name="calendar-outline" size={24} color="#FF6B00" />
             </View>
-            <Ionicons name="calendar-outline" size={24} color="#16a34a" />
           </TouchableOpacity>
           {durationError ? (
-            <Text className="text-red-500 text-sm mt-1 ml-1">
-              {durationError}
-            </Text>
+            <Text style={styles.errorText}>{durationError}</Text>
           ) : null}
         </View>
 
-        <Modal visible={datePickerVisible} transparent animationType="slide">
-          <View className="flex-1 bg-black/50 justify-end">
-            <View className="bg-white rounded-t-3xl p-6">
-              <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-lg font-bold">Select Expiry Date</Text>
-                <TouchableOpacity onPress={() => setDatePickerVisible(false)}>
-                  <Ionicons name="close" size={24} color="gray" />
-                </TouchableOpacity>
-              </View>
-              <View className="items-center bg-gray-100 rounded-xl p-4">
-                <DateTimePicker
-                  value={selectedDate}
-                  mode="date"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={(event, date) => {
-                    if (date) setSelectedDate(date);
-                  }}
-                  minimumDate={new Date()}
-                  textColor="#000000"
-                />
-              </View>
-              <TouchableOpacity
-                className="bg-green-600 rounded-xl p-4 items-center mt-4"
-                onPress={() => handleDateSelect(selectedDate)}
-              >
-                <Text className="text-white font-semibold">Set Date</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
-        <View className="flex-row gap-3 mt-6">
+        {/* Action Buttons */}
+        <View style={styles.actionButtons}>
           <TouchableOpacity
-            className="flex-1 bg-gray-500 rounded-xl p-4 items-center"
+            style={[styles.button, styles.clearButton]}
             onPress={clearForm}
+            activeOpacity={0.8}
           >
-            <Text className="text-white font-semibold">Clear Form</Text>
+            <Text style={styles.clearButtonText}>Clear Form</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className="flex-1 bg-green-600 rounded-xl p-4 items-center"
+            style={[styles.button, styles.saveButton, saving && styles.saveButtonDisabled]}
             onPress={saveStock}
             disabled={saving}
+            activeOpacity={0.8}
           >
-            <Text className="text-white font-semibold">
+            <Text style={styles.saveButtonText}>
               {saving ? "Saving..." : "Save"}
             </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
+      {/* Date Picker Modal */}
+      <Modal visible={datePickerVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Expiry Date</Text>
+              <TouchableOpacity onPress={() => setDatePickerVisible(false)}>
+                <Ionicons name="close" size={24} color="#FFE4CC" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.datePickerContainer}>
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={(event, date) => {
+                  if (date) setSelectedDate(date);
+                }}
+                minimumDate={new Date()}
+                textColor="#FFFFFF"
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => handleDateSelect(selectedDate)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.modalButtonText}>Set Date</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       {/* List Selection Modal */}
       <Modal visible={showListModal} transparent animationType="slide">
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-3xl p-6">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-bold">Select List</Text>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select List</Text>
               <TouchableOpacity onPress={() => setShowListModal(false)}>
-                <Ionicons name="close" size={24} color="gray" />
+                <Ionicons name="close" size={24} color="#FFE4CC" />
               </TouchableOpacity>
             </View>
 
-            <Text className="text-gray-600 text-sm mb-3">
+            <Text style={styles.modalDescription}>
               Which list do you want to save this item to?
             </Text>
 
-            <ScrollView className="max-h-64 mb-4">
+            <ScrollView style={styles.modalListScroll}>
               <TouchableOpacity
-                className="flex-row justify-between items-center py-3 px-3 rounded-lg mb-2"
-                style={{
-                  backgroundColor:
-                    selectedListId === null ? "#dcfce7" : "transparent",
-                }}
+                style={[
+                  styles.modalListItem,
+                  selectedListId === null && styles.modalListItemSelected,
+                ]}
                 onPress={() => setSelectedListId(null)}
+                activeOpacity={0.7}
               >
-                <Text className="text-gray-900">No List (Stock Only)</Text>
+                <Text style={styles.modalListItemText}>No List (Stock Only)</Text>
                 <Ionicons
                   name={
                     selectedListId === null
@@ -607,21 +634,21 @@ export default function AddStock() {
                       : "radio-button-off"
                   }
                   size={20}
-                  color="#16a34a"
+                  color="#FF6B00"
                 />
               </TouchableOpacity>
 
               {lists.map((list) => (
                 <TouchableOpacity
                   key={list.id}
-                  className="flex-row justify-between items-center py-3 px-3 rounded-lg mb-2"
-                  style={{
-                    backgroundColor:
-                      selectedListId === list.id ? "#dcfce7" : "transparent",
-                  }}
+                  style={[
+                    styles.modalListItem,
+                    selectedListId === list.id && styles.modalListItemSelected,
+                  ]}
                   onPress={() => setSelectedListId(list.id)}
+                  activeOpacity={0.7}
                 >
-                  <Text className="text-gray-900">{list.name}</Text>
+                  <Text style={styles.modalListItemText}>{list.name}</Text>
                   <Ionicons
                     name={
                       selectedListId === list.id
@@ -629,30 +656,32 @@ export default function AddStock() {
                         : "radio-button-off"
                     }
                     size={20}
-                    color="#16a34a"
+                    color="#FF6B00"
                   />
                 </TouchableOpacity>
               ))}
             </ScrollView>
 
-            <View className="flex-row gap-3">
+            <View style={styles.modalActions}>
               <TouchableOpacity
-                className="flex-1 bg-gray-500 rounded-xl p-4 items-center"
+                style={[styles.button, styles.modalCancelButton]}
                 onPress={() => {
                   setShowListModal(false);
                   setPendingStockData(null);
                 }}
+                activeOpacity={0.8}
               >
-                <Text className="text-white font-semibold">Cancel</Text>
+                <Text style={styles.clearButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="flex-1 bg-green-600 rounded-xl p-4 items-center"
+                style={[styles.button, styles.saveButton]}
                 onPress={() => {
                   setShowListModal(false);
                   confirmSaveStock();
                 }}
+                activeOpacity={0.8}
               >
-                <Text className="text-white font-semibold">Save to Stock</Text>
+                <Text style={styles.saveButtonText}>Save to Stock</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -661,3 +690,357 @@ export default function AddStock() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#3D2417",
+  },
+  backgroundDecor: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  circle: {
+    position: "absolute",
+    borderRadius: 9999,
+    backgroundColor: "rgba(255, 107, 0, 0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 107, 0, 0.12)",
+  },
+  circleTopLeft1: {
+    top: -60,
+    left: -60,
+    width: 180,
+    height: 180,
+  },
+  circleTopRight1: {
+    top: -40,
+    right: -40,
+    width: 150,
+    height: 150,
+  },
+  circleBottomLeft1: {
+    bottom: -50,
+    left: -50,
+    width: 160,
+    height: 160,
+  },
+  circleBottomRight1: {
+    bottom: -70,
+    right: -70,
+    width: 200,
+    height: 200,
+  },
+  header: {
+    paddingTop: 48,
+    paddingBottom: 24,
+    paddingHorizontal: 24,
+  },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    padding: 12,
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    marginRight: 16,
+  },
+  headerTitle: {
+    color: "#FFFFFF",
+    fontSize: 28,
+    letterSpacing: 0.5,
+    ...fontStyles.bold,
+    textShadowColor: "rgba(255, 107, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  scrollViewContent: {
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    color: "#FFE4CC",
+    fontSize: 14,
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    ...fontStyles.semibold,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    padding: 16,
+    borderRadius: 16,
+    color: "#FFFFFF",
+    fontSize: 16,
+    ...fontStyles.medium,
+  },
+  inputError: {
+    borderColor: "#FF6B00",
+    borderWidth: 2,
+  },
+  errorText: {
+    color: "#FF8C42",
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+    ...fontStyles.regular,
+  },
+  emptyListsContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+  },
+  emptyListsText: {
+    color: "#FFE4CC",
+    fontSize: 14,
+    opacity: 0.7,
+    ...fontStyles.regular,
+  },
+  listsContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 16,
+    padding: 16,
+  },
+  listsLabel: {
+    color: "#FFE4CC",
+    fontSize: 13,
+    marginBottom: 8,
+    ...fontStyles.regular,
+  },
+  listsScroll: {
+    maxHeight: 128,
+    marginBottom: 8,
+  },
+  listItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 4,
+  },
+  listItemSelected: {
+    backgroundColor: "rgba(255, 107, 0, 0.15)",
+  },
+  listItemText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    ...fontStyles.medium,
+  },
+  listItemsContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.15)",
+  },
+  noItemsText: {
+    color: "#FFE4CC",
+    fontSize: 13,
+    opacity: 0.5,
+    ...fontStyles.regular,
+  },
+  itemsScroll: {
+    maxHeight: 128,
+  },
+  listItemCard: {
+    backgroundColor: "rgba(255, 107, 0, 0.1)",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 107, 0, 0.2)",
+  },
+  listItemName: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    ...fontStyles.semibold,
+    marginBottom: 4,
+  },
+  listItemDetails: {
+    color: "#FFE4CC",
+    fontSize: 12,
+    ...fontStyles.regular,
+  },
+  datePickerButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    padding: 16,
+    borderRadius: 16,
+  },
+  datePickerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  datePickerText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    ...fontStyles.medium,
+  },
+  datePickerSubtext: {
+    color: "#FFE4CC",
+    fontSize: 12,
+    marginTop: 4,
+    ...fontStyles.regular,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+  },
+  button: {
+    flex: 1,
+    borderRadius: 16,
+    padding: 16,
+    alignItems: "center",
+  },
+  clearButton: {
+    backgroundColor: "rgba(139, 69, 19, 0.8)",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  clearButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    ...fontStyles.bold,
+  },
+  saveButton: {
+    backgroundColor: "#FF6B00",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    shadowColor: "#FF6B00",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  saveButtonDisabled: {
+    opacity: 0.6,
+  },
+  saveButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    ...fontStyles.heavy,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "rgba(61, 36, 23, 0.98)",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    borderTopWidth: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: "rgba(255, 107, 0, 0.3)",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 22,
+    color: "#FFFFFF",
+    ...fontStyles.bold,
+    letterSpacing: 0.5,
+  },
+  modalDescription: {
+    color: "#FFE4CC",
+    fontSize: 14,
+    marginBottom: 16,
+    ...fontStyles.regular,
+  },
+  datePickerContainer: {
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+  },
+  modalButton: {
+    backgroundColor: "#FF6B00",
+    borderRadius: 16,
+    padding: 16,
+    alignItems: "center",
+    marginTop: 16,
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    shadowColor: "#FF6B00",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    ...fontStyles.heavy,
+  },
+  modalListScroll: {
+    maxHeight: 256,
+    marginBottom: 16,
+  },
+  modalListItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  modalListItemSelected: {
+    backgroundColor: "rgba(255, 107, 0, 0.2)",
+    borderColor: "rgba(255, 107, 0, 0.4)",
+  },
+  modalListItemText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    ...fontStyles.medium,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  modalCancelButton: {
+    backgroundColor: "rgba(139, 69, 19, 0.8)",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+});

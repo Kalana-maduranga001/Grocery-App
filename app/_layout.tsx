@@ -1,26 +1,40 @@
-import React from 'react'
-import { StatusBar } from 'expo-status-bar'
-import { Slot } from 'expo-router'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import Toast from 'react-native-toast-message'
-import '../global.css'
-import { AuthProvider } from '@/context/AuthContext'
-import { LoaderProvider } from '@/context/LoaderContext'
+import { AuthProvider } from "@/context/AuthContext";
+import { LoaderProvider } from "@/context/LoaderContext";
+import { Slot } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React from "react";
+import { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+import "../global.css";
 
-export default function RootLayout () {
+export default function RootLayout() {
   return (
     <LoaderProvider>
       <AuthProvider>
         <>
-          <SafeAreaView className="flex-1 bg-gray-50">
-            <StatusBar style="dark" />
+          {/* Status bar with light content for dark background */}
+          <StatusBar style="light" translucent backgroundColor="transparent" />
+
+          {/* SafeArea with app theme colors */}
+          <SafeAreaView
+            edges={["top", "left", "right", "bottom"]}
+            style={styles.safeArea}
+          >
             <Slot />
           </SafeAreaView>
 
-          {/* ✅ Toast MUST be outside SafeAreaView */}
+          {/* Toast notifications - Must be outside SafeAreaView */}
           <Toast />
         </>
       </AuthProvider>
     </LoaderProvider>
-  )
+  );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#3D2417', // Main app brown background
+  },
+});

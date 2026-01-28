@@ -8,11 +8,11 @@ export default function Index() {
   const [showLoading, setShowLoading] = useState(true);
 
   useEffect(() => {
-    // Force loading screen to show for minimum 10 seconds
+    // Force loading screen to show for minimum 10 seconds (enough time for data to load)
     const timer = setTimeout(() => {
       console.log("[INDEX] 10s timer finished");
       setShowLoading(false);
-    }, 10000);
+    }, 10000); // 10 seconds
 
     return () => clearTimeout(timer);
   }, []);
