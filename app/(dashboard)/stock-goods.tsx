@@ -6,6 +6,7 @@ import {
   showToast,
 } from "@/utils/notifications";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import {
   collection,
@@ -16,7 +17,9 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
+  Image,
   Modal,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -49,6 +52,7 @@ type StockItem = {
   startDate?: any;
   reminderScheduledAt?: any;
   reminderId?: string | null;
+  imageUrl?: string;
 };
 
 export default function StockGoods() {
@@ -56,6 +60,10 @@ export default function StockGoods() {
   const { user } = useAuth();
   const [allItems, setAllItems] = useState<ItemWithDetails[]>([]);
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
+  const [currentItemForPhoto, setCurrentItemForPhoto] = useState<any>(null);
+  const [photoPreviewModalVisible, setPhotoPreviewModalVisible] =
+    useState(false);
+  const [capturedPhotoUri, setCapturedPhotoUri] = useState<string | null>(null);
 
   const handleBack = () => {
     if (router.canGoBack && router.canGoBack()) {
@@ -276,6 +284,267 @@ export default function StockGoods() {
     );
   };
 
+  // Capture photo from camera using ImagePicker
+  const takePicture = async () => {
+    if (!currentItemForPhoto || !user) {
+      showToast("error", "Item not selected");
+      return;
+    }
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        const { uri } = result.assets[0];
+        setCapturedPhotoUri(uri);
+        setPhotoPreviewModalVisible(true);
+      }
+    } catch (e: any) {
+      showToast("error", "Camera failed", e.message);
+    }
+  };
+
+  // Pick image from gallery
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        const { uri } = result.assets[0];
+        setCapturedPhotoUri(uri);
+        setPhotoPreviewModalVisible(true);
+      }
+    } catch (e: any) {
+      showToast("error", "Gallery access failed", e.message);
+    }
+  };
+
+  // Save photo locally to device storage (try MediaLibrary -> FileSystem fallback)
+  const savePhotoLocally = async (photoUri: string, itemName: string) => {
+    try {
+      console.log("[PHOTO_SAVE] Starting photo save:", { photoUri, itemName });
+
+      if (Platform.OS === "web") {
+        console.log("[PHOTO_SAVE] Web platform detected, using original uri.");
+        return photoUri;
+      }
+
+      // 1) Try saving to the device gallery using expo-media-library
+      try {
+        const MediaLibraryMod: any = await import("expo-media-library");  // <--- show error
+        const MediaLibrary = MediaLibraryMod.default || MediaLibraryMod;
+
+        if (MediaLibrary && MediaLibrary.requestPermissionsAsync) {
+          const perm = await MediaLibrary.requestPermissionsAsync();
+          if (perm?.granted) {
+            try {
+              // createAssetAsync will import the file into the gallery
+              const asset = await MediaLibrary.createAssetAsync(photoUri);
+              const albumName = "GroceryApp";
+              try {
+                // Try creating a dedicated album; ignore failure if it exists
+                await MediaLibrary.createAlbumAsync(albumName, asset, false);
+              } catch (albErr) {
+                try {
+                  // If createAlbumAsync fails (album exists), try adding asset to album
+                  await MediaLibrary.addAssetsToAlbumAsync(
+                    [asset],
+                    albumName,
+                    false,
+                  );
+                } catch (eAdd) {
+                  /* ignore */
+                }
+              }
+
+              console.log(
+                "[PHOTO_SAVE] Saved to gallery as asset:",
+                asset?.uri,
+              );
+              showToast("success", "💾 Photo saved to gallery");
+              return asset?.uri || photoUri;
+            } catch (eSave: any) {
+              console.log(
+                "[PHOTO_SAVE] MediaLibrary.createAssetAsync failed:",
+                eSave?.message || eSave,
+              );
+              // continue to FileSystem fallback
+            }
+          } else {
+            console.log("[PHOTO_SAVE] MediaLibrary permission denied");
+          }
+        }
+      } catch (e: any) {
+        console.log(
+          "[PHOTO_SAVE] expo-media-library unavailable:",
+          (e as any)?.message || e,
+        );
+      }
+
+      // 2) Fallback: try to write to the app document directory using expo-file-system
+      let fs: any = null;
+      try {
+        const fsMod: any = await import("expo-file-system");
+        fs = fsMod.default || fsMod;
+      } catch (e) {
+        console.log(
+          "[PHOTO_SAVE] expo-file-system unavailable:",
+          (e as any)?.message || e,
+        );
+      }
+
+      if (!fs) {
+        console.log(
+          "[PHOTO_SAVE] No suitable native module available; returning original uri",
+        );
+        return photoUri;
+      }
+
+      const baseDir = fs.documentDirectory || fs.cacheDirectory;
+      if (!baseDir) {
+        console.log(
+          "[PHOTO_SAVE] No writable base directory, using original uri.",
+        );
+        return photoUri;
+      }
+
+      const safeName = (itemName || "photo").replace(/[^a-zA-Z0-9_-]+/g, "_");
+      const fileName = `${safeName}_${Date.now()}.jpg`;
+      const dirPath = `${baseDir}grocery_photos/`;
+      const localPath = `${dirPath}${fileName}`;
+
+      try {
+        await fs.makeDirectoryAsync(dirPath, { intermediates: true });
+      } catch (mkErr: any) {
+        console.log(
+          "[PHOTO_SAVE] makeDirectoryAsync note:",
+          mkErr?.message || mkErr,
+        );
+      }
+
+      // Prefer downloadAsync which works for http(s) and some content uris
+      try {
+        if (fs.downloadAsync) {
+          const dl = await fs.downloadAsync(photoUri, localPath);
+          console.log(
+            "[PHOTO_SAVE] downloadAsync success:",
+            dl?.uri || localPath,
+          );
+          showToast("success", "💾 Photo saved locally");
+          return dl?.uri || localPath;
+        }
+      } catch (dlErr: any) {
+        console.log(
+          "[PHOTO_SAVE] downloadAsync failed:",
+          dlErr?.message || dlErr,
+        );
+      }
+
+      // If downloadAsync didn't work, try copyAsync with a normalized file:// path
+      try {
+        const normalizedUri = photoUri.startsWith("file://")
+          ? photoUri
+          : `file://${photoUri}`;
+        if (fs.copyAsync) {
+          await fs.copyAsync({ from: normalizedUri, to: localPath });
+          console.log("[PHOTO_SAVE] copyAsync success:", localPath);
+          showToast("success", "💾 Photo saved locally");
+          return localPath;
+        }
+      } catch (cpErr: any) {
+        console.log("[PHOTO_SAVE] copyAsync failed:", cpErr?.message || cpErr);
+      }
+
+      console.log(
+        "[PHOTO_SAVE] All save attempts failed, returning original uri",
+      );
+      return photoUri;
+    } catch (e: any) {
+      console.error("[PHOTO_SAVE] Unexpected ERROR:", e);
+      showToast("error", "Save failed", e?.message || "Unknown error");
+      return photoUri;
+    }
+  };
+
+  // Update item image (saves locally first)
+  const updateItemImage = async (item: any, imageUri: string) => {
+    if (!user) return;
+    try {
+      // Save to local storage first
+      const localPath = await savePhotoLocally(imageUri, item.name);
+      const pathToSave = localPath || imageUri;
+
+      if (item.type === "stock") {
+        const stockRef = doc(db, "users", user.uid, "stock", item.id);
+        await updateDoc(stockRef, {
+          imageUrl: pathToSave,
+        });
+      } else if (item.type === "listItem") {
+        const itemRef = doc(
+          db,
+          "users",
+          user.uid,
+          "lists",
+          item.listId,
+          "items",
+          item.id,
+        );
+        await updateDoc(itemRef, {
+          imageUrl: pathToSave,
+        });
+      }
+    } catch (e: any) {
+      showToast("error", "Image save failed", e.message);
+    }
+  };
+
+  // Open camera for item
+  const openCameraForItem = async (item: any) => {
+    setCurrentItemForPhoto(item);
+    // Directly launch camera - permissions will be requested by ImagePicker
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && user) {
+        const { uri } = result.assets[0];
+        await updateItemImage(item, uri);
+        showToast("success", "📸 Photo captured!");
+      }
+    } catch (e: any) {
+      showToast("error", "Camera error", e.message);
+    }
+    setCurrentItemForPhoto(null);
+  };
+
+  // Confirm and set photo to selected item
+  const confirmPhotoForItem = async () => {
+    if (!currentItemForPhoto || !capturedPhotoUri || !user) {
+      showToast("error", "Missing item or photo");
+      return;
+    }
+    try {
+      await updateItemImage(currentItemForPhoto, capturedPhotoUri);
+      showToast("success", "✅ Photo set to item!");
+      setPhotoPreviewModalVisible(false);
+      setCapturedPhotoUri(null);
+      setCurrentItemForPhoto(null);
+    } catch (e: any) {
+      showToast("error", "Failed to set photo", e.message);
+    }
+  };
+
   return (
     <View className="flex-1 bg-gray-50">
       <View className="bg-green-600 pt-12 pb-6 px-6 rounded-b-3xl shadow-lg">
@@ -340,6 +609,15 @@ export default function StockGoods() {
                   key={`item-${nameKey}`}
                   className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100"
                 >
+                  {sampleItem.imageUrl && (
+                    <View className="mb-3 rounded-lg overflow-hidden">
+                      <Image
+                        source={{ uri: sampleItem.imageUrl }}
+                        className="w-full h-40 bg-gray-200"
+                      />
+                    </View>
+                  )}
+
                   <View className="flex-row justify-between items-start mb-2">
                     <View className="flex-1">
                       <Text className="text-gray-900 font-bold text-xl">
@@ -350,6 +628,23 @@ export default function StockGoods() {
                       )}
                     </View>
                     <View className="flex-row gap-2">
+                      <TouchableOpacity
+                        onPress={() => {
+                          const item = stockInfo
+                            ? { ...stockInfo, type: "stock" }
+                            : {
+                                ...(sampleItem as ItemWithDetails),
+                                type: "listItem",
+                              };
+                          openCameraForItem(item);
+                        }}
+                      >
+                        <Ionicons
+                          name="camera-outline"
+                          size={22}
+                          color="#06b6d4"
+                        />
+                      </TouchableOpacity>
                       <TouchableOpacity onPress={handleEdit}>
                         <Ionicons
                           name="create-outline"
@@ -505,6 +800,60 @@ export default function StockGoods() {
               >
                 <Text className="text-white font-semibold text-center">
                   Save
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Photo Preview Modal */}
+      <Modal
+        visible={photoPreviewModalVisible}
+        transparent
+        animationType="slide"
+      >
+        <View className="flex-1 bg-black/50 justify-center items-center px-6">
+          <View className="bg-white rounded-xl p-6 w-full max-w-sm">
+            <Text className="text-xl font-bold mb-4">📸 Photo Preview</Text>
+
+            {capturedPhotoUri && (
+              <View className="mb-4 rounded-lg overflow-hidden border-2 border-gray-300">
+                <Image
+                  source={{ uri: capturedPhotoUri }}
+                  className="w-full h-64 bg-gray-200"
+                />
+              </View>
+            )}
+
+            <View className="bg-blue-50 rounded-lg p-3 mb-4">
+              <Text className="text-gray-700 font-semibold mb-2">
+                Item to Set:
+              </Text>
+              <Text className="text-blue-700 text-lg font-bold">
+                {currentItemForPhoto?.name || "Unknown Item"}
+              </Text>
+            </View>
+
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                className="flex-1 bg-gray-400 rounded-lg p-3"
+                onPress={() => {
+                  setPhotoPreviewModalVisible(false);
+                  setCapturedPhotoUri(null);
+                }}
+              >
+                <Text className="text-white font-semibold text-center">
+                  Retake
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-1 bg-green-600 rounded-lg p-3"
+                onPress={confirmPhotoForItem}
+              >
+                <Text className="text-white font-semibold text-center">
+                  ✅ Confirm
                 </Text>
               </TouchableOpacity>
             </View>
