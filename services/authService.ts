@@ -1,10 +1,10 @@
 import { auth, db } from "./firebaseConfig";
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile,
-  signOut,
-  User,
+  // createUserWithEmailAndPassword,
+  // signInWithEmailAndPassword,
+  // updateProfile,
+  // signOut,
+  // User,
 } from "firebase/auth";
 import { doc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 
