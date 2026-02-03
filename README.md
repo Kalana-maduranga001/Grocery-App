@@ -6,6 +6,42 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 - [Latest Android build](https://drive.google.com/file/d/1ltokiIqq86tZ512sQkCnoXuJziJSUntR/view?usp=sharing)
 
+## Overview
+
+SmartGrocer keeps grocery shopping and household stock management simple. Plan supermarket visits by creating reusable lists, tick items off in real time while you shop, and record purchased quantities with expected depletion dates. The app learns usage patterns, estimates when essentials will run low, and notifies you before stocks are exhausted so you can restock without stress.
+
+## Folder Structure
+
+| Path                                   | Description                                                   |
+| -------------------------------------- | ------------------------------------------------------------- |
+| [app](app)                             | Expo Router screens and layouts driving navigation.           |
+| [app/(auth)](app/%28auth%29)           | Authentication flows for login and registration.              |
+| [app/(dashboard)](app/%28dashboard%29) | Post-login dashboard experiences including stock and lists.   |
+| [components](components)               | Reusable UI components such as glass buttons and loaders.     |
+| [context](context)                     | React context providers for authentication and loading state. |
+| [hooks](hooks)                         | Custom hooks that wrap context accessors and business logic.  |
+| [services](services)                   | API and Firebase helpers powering data access.                |
+| [types](types)                         | Shared TypeScript types for consistent models.                |
+| [utils](utils)                         | Utility helpers for notifications and Cloudinary integration. |
+| [assets/images](assets/images)         | App imagery consumed across screens.                          |
+| [assets/logos](assets/logos)           | Brand assets and icons for marketing surfaces.                |
+
+## Services
+
+- [services/authService.ts](services/authService.ts) – Handles authentication workflows backed by Firebase.
+- [services/firebaseConfig.ts](services/firebaseConfig.ts) – Centralized Firebase configuration shared across the app.
+
+## Technologies
+
+- Expo Router with React Native and TypeScript.
+- Firebase authentication and Firestore integration.
+- Tailwind CSS (via NativeWind) for styling.
+- Expo Notifications for timely restock reminders.
+
+## Assets and Logos
+
+Access brand visuals inside [assets/logos](assets/logos). Use these files for in-app placements or promotional materials, and add new logo variants here so they remain versioned with the project.
+
 ## Get started
 
 1. Install dependencies
