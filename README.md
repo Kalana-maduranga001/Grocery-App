@@ -93,6 +93,6 @@ Join our community of developers creating universal apps.
 
 I created a video walkthrough/demo of this project:
 
-👉 https://www.youtube.com/watch?v=aFk3pxdBj5I
+👉 [https://www.youtube.com/watch?v=aFk3pxdBj5I](https://youtu.be/MtZRt4hvC8U?si=WN9ZscS08ORS7RDz)
 
 (If the video is unlisted, make sure your collaborators have the link.)
